@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogger Theme Builder Pro - 1:1 Visual Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blogger: {
+                            orange: '#F57C00',
+                            darkorange: '#E65100',
+                            dark: '#202124',
+                            surface: '#F8F9FA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .code-font { font-family: 'Fira Code', monospace; }
+        #canvas-root .widget-node { outline: 1px dashed transparent; outline-offset: 2px; border-radius: 8px; transition: outline-color .15s ease; }
+        #canvas-root .widget-node:hover { outline-color: rgba(245, 124, 0, .55); cursor: pointer; }
+        #canvas-root .widget-node.is-selected { outline: 2px solid #F57C00; }
+    </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col overflow-hidden select-none">
+
+    <!-- TOP TOOLBAR -->
+    <header class="h-14 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-4 z-30 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blogger-orange text-white p-2 rounded-lg font-bold text-sm flex items-center shadow-lg shadow-orange-500/20">
+                <i class="fa-brands fa-blogger text-lg mr-2"></i> BTBP
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span id="project-name-display" class="font-semibold text-sm tracking-tight text-white cursor-pointer hover:text-blogger-orange transition" title="Click to rename" onclick="app.renameProject()">Modern Mag Pro v2.6</span>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-medium border border-emerald-500/30">1:1 Synced Studio</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Canonical Blogger Theme Schema Active</div>
+            </div>
+        </div>
+
+        <div class="hidden md:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-lg border border-slate-700">
+            <button onclick="app.setViewport('desktop')" id="vp-desktop" class="px-3 py-1 rounded text-xs font-medium text-slate-200 bg-slate-700 shadow transition flex items-center space-x-1.5"><i class="fa-solid fa-desktop"></i><span>Desktop (1440)</span></button>
+            <button onclick="app.setViewport('tablet')" id="vp-tablet" class="px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5"><i class="fa-solid fa-tablet-screen-button"></i><span>Tablet (768)</span></button>
+            <button onclick="app.setViewport('mobile')" id="vp-mobile" class="px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5"><i class="fa-solid fa-mobile-screen"></i><span>Mobile (375)</span></button>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="app.promptImportXML()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded-lg transition flex items-center space-x-1.5 border border-slate-600" title="Import existing Blogger XML">
+                <i class="fa-solid fa-file-import text-emerald-400"></i><span>Import XML</span>
+            </button>
+            <button onclick="app.validateTheme()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded-lg transition flex items-center space-x-1.5 border border-slate-600">
+                <i class="fa-solid fa-shield-halved text-amber-400"></i><span>Validate</span>
+            </button>
+            <button onclick="app.copyXML()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded-lg transition flex items-center space-x-1.5 border border-slate-600">
+                <i class="fa-solid fa-copy text-blue-400"></i><span>Copy XML</span>
+            </button>
+            <button onclick="app.downloadXML()" class="px-3 py-1.5 bg-blogger-orange hover:bg-blogger-darkorange text-white text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 shadow-lg shadow-orange-500/20">
+                <i class="fa-solid fa-download"></i><span>Export XML</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP WORKSPACE -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT PANEL: Navigation & Toolbox -->
+        <aside id="left-panel" class="w-72 bg-slate-800 border-r border-slate-700 flex flex-col z-20 shrink-0">
+            <div class="grid grid-cols-4 bg-slate-900 p-1 border-b border-slate-700 text-center text-xs">
+                <button onclick="app.switchTab('elements')" id="tab-btn-elements" class="py-2 font-medium text-slate-200 bg-slate-800 rounded transition flex flex-col items-center justify-center"><i class="fa-solid fa-shapes text-sm mb-0.5 text-blogger-orange"></i><span>Add</span></button>
+                <button onclick="app.switchTab('layout')" id="tab-btn-layout" class="py-2 font-medium text-slate-400 hover:text-white transition flex flex-col items-center justify-center"><i class="fa-solid fa-layer-group text-sm mb-0.5"></i><span>Layout</span></button>
+                <button onclick="app.switchTab('customizer')" id="tab-btn-customizer" class="py-2 font-medium text-slate-400 hover:text-white transition flex flex-col items-center justify-center"><i class="fa-solid fa-palette text-sm mb-0.5"></i><span>Theme</span></button>
+                <button onclick="app.switchTab('xml')" id="tab-btn-xml" class="py-2 font-medium text-slate-400 hover:text-white transition flex flex-col items-center justify-center"><i class="fa-solid fa-code text-sm mb-0.5"></i><span>XML</span></button>
+            </div>
+
+            <div id="left-tab-content" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-4"></div>
+        </aside>
+
+        <!-- CENTER PANEL: Interactive Canvas & Viewports -->
+        <main class="flex-1 bg-slate-950 flex flex-col overflow-hidden relative">
+            <div class="h-12 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-10 shrink-0">
+                <div class="flex items-center space-x-2 xl:space-x-3">
+                    <span class="hidden 2xl:inline text-xs font-semibold text-slate-400 uppercase tracking-wider">Preview:</span>
+                    <div class="flex bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs">
+                        <button onclick="app.setPreviewMode('theme')" id="pm-theme" class="px-2.5 py-1 rounded bg-slate-700 text-white font-medium transition flex items-center space-x-1.5" title="WYSIWYG preview rendered with the exported theme CSS"><i class="fa-solid fa-eye"></i><span class="hidden lg:inline">Blog Preview</span></button>
+                        <button onclick="app.setPreviewMode('layout')" id="pm-layout" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition flex items-center space-x-1.5" title="Blogger-style Layout page with sections and gadgets"><i class="fa-solid fa-table-columns"></i><span class="hidden lg:inline">Blogger Layout</span></button>
+                    </div>
+
+                    <div class="flex items-center space-x-1 border-l border-slate-600 pl-2 ml-2">
+                        <span class="hidden sm:inline text-xs font-semibold text-slate-400 uppercase tracking-wider">Panels:</span>
+                        <button onclick="app.togglePanel('left')" id="panel-toggle-left" class="px-2 py-1 rounded text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-700 transition flex items-center space-x-1" title="Hide/show left panel (gadgets)"><i class="fa-solid fa-chevron-left"></i><span class="hidden sm:inline">Left</span></button>
+                        <button onclick="app.togglePanel('right')" id="panel-toggle-right" class="px-2 py-1 rounded text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-700 transition flex items-center space-x-1" title="Hide/show right panel (inspector)"><i class="fa-solid fa-chevron-right"></i><span class="hidden sm:inline">Right</span></button>
+                    </div>
+                    <span class="hidden 2xl:inline text-xs font-semibold text-slate-400 uppercase tracking-wider">Page:</span>
+                    <div id="page-type-group" class="flex bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs transition-opacity duration-200">
+                        <button onclick="app.setPageType('index')" id="pt-index" class="px-2.5 py-1 rounded bg-slate-700 text-white font-medium transition">Homepage</button>
+                        <button onclick="app.setPageType('item')" id="pt-item" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">Post Detail</button>
+                        <button onclick="app.setPageType('archive')" id="pt-archive" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">Archive</button>
+                        <button onclick="app.setPageType('static_page')" id="pt-static_page" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">Static Page</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-xs text-slate-400">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="canvas-mode-state">Live 1:1 Schema Synchronized</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-4 md:p-8 flex items-center justify-center bg-slate-950/80 custom-scrollbar">
+                <div id="canvas-viewport-frame" class="bg-white text-slate-900 shadow-2xl rounded-xl overflow-hidden transition-all duration-300 w-full max-w-[1440px] h-full flex flex-col border border-slate-700">
+                    <div id="canvas-root" class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT PANEL: Properties Inspector -->
+        <aside id="right-panel" class="w-80 bg-slate-800 border-l border-slate-700 flex flex-col z-20 shrink-0">
+            <div class="h-12 bg-slate-900 border-b border-slate-700 px-4 flex items-center justify-between">
+                <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                    <i class="fa-solid fa-sliders text-blogger-orange mr-2"></i> Properties Inspector
+                </h3>
+                <span id="selected-item-badge" class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded">No selection</span>
+            </div>
+            <div id="right-panel-content" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 text-sm"></div>
+        </aside>
+
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+    <div id="modal-container" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4"></div>
+
+    <script>
+        const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+
+        const OPEN_BODY_TAG = '<' + 'body>';
+        const CLOSE_HEAD_TAG = '</' + 'head>';
+        const CLOSE_BODY_TAG = '</' + 'body>';
+        const CLOSE_HTML_TAG = '</' + 'html>';
+
+        const DEFAULT_CUSTOMIZER = {
+            colors: {
+                primary: '#F57C00',
+                secondary: '#1A73E8',
+                background: '#FFFFFF',
+                surface: '#F8F9FA',
+                text: '#202124',
+                muted: '#5F6368',
+                border: '#DADCE0',
+                links: '#1A73E8'
+            },
+            typography: {
+                fontFamily: "'Inter', sans-serif",
+                headingSize: '32px',
+                bodySize: '15px',
+                mainWidth: '100%',
+                postWidth: '60%',
+                sidebarLeftWidth: '20%',
+                sidebarRightWidth: '20%'
+            }
+        };
+
+        const NATIVE_WIDGET_REGISTRY = {
+            Header: { idPrefix: 'Header', version: 2, defaultTitle: 'Blog Header', icon: 'fa-heading', desc: 'Blog title, description, and logo banner.', defaults: { description: '', showImage: false, imageLogo: '' } },
+            Blog: { idPrefix: 'Blog', version: 2, defaultTitle: 'Blog Posts', icon: 'fa-newspaper', desc: 'Main post stream, pagination, and comments.', defaults: { postsPerPage: 6, showAuthor: true, showTimestamp: true, showLabels: true, readMoreText: 'Continue Reading →' } },
+            PageList: { idPrefix: 'PageList', version: 2, defaultTitle: 'Pages', icon: 'fa-bars', desc: 'Top navigation bar for static pages.', defaults: { showHome: true, pages: ['Home', 'About'] } },
+            PopularPosts: { idPrefix: 'PopularPosts', version: 2, defaultTitle: 'Popular Posts', icon: 'fa-fire', desc: 'Displays most viewed posts with thumbnails.', defaults: { maxPosts: 4, showThumbnail: true, showSnippet: false } },
+            Label: { idPrefix: 'Label', version: 2, defaultTitle: 'Labels', icon: 'fa-tags', desc: 'Categorized label cloud or list with counts.', defaults: { displayMode: 'cloud', showCount: true } },
+            BlogArchive: { idPrefix: 'BlogArchive', version: 2, defaultTitle: 'Blog Archive', icon: 'fa-box-archive', desc: 'Chronological archive tree of blog posts.', defaults: { hierarchy: 'tree' } },
+            Profile: { idPrefix: 'Profile', version: 2, defaultTitle: 'About Me', icon: 'fa-user', desc: 'Author profile card and bio.', defaults: { bio: 'Editor of TechPulse Daily. Writing about web platforms, publishing tools, and developer workflows.' } },
+            HTML: { idPrefix: 'HTML', version: 2, defaultTitle: 'HTML / JavaScript', icon: 'fa-code', desc: 'Custom HTML snippets, banners, or widgets.', defaults: { content: '' } },
+            Image: { idPrefix: 'Image', version: 2, defaultTitle: 'Image Gadget', icon: 'fa-image', desc: 'Display a responsive image with link.', defaults: { imageUrl: '', imageLink: '', altText: '' } },
+            LinkList: { idPrefix: 'LinkList', version: 2, defaultTitle: 'Blogroll / Links', icon: 'fa-link', desc: 'Curated list of external or internal links.', defaults: { links: [] } },
+            BlogSearch: { idPrefix: 'BlogSearch', version: 2, defaultTitle: 'Blog Search', icon: 'fa-magnifying-glass', desc: 'Live search box for blog entries.', defaults: { placeholder: 'Search articles...' } },
+            Attribution: { idPrefix: 'Attribution', version: 2, defaultTitle: 'Attribution', icon: 'fa-copyright', desc: 'Copyright and template credits.', defaults: { creditText: 'Powered by Blogger.' } },
+            ContactForm: { idPrefix: 'ContactForm', version: 2, defaultTitle: 'Contact Form', icon: 'fa-envelope', desc: 'Visitor contact form widget.', defaults: {} },
+            FeaturedPost: { idPrefix: 'FeaturedPost', version: 2, defaultTitle: 'Featured Post', icon: 'fa-star', desc: 'Highlight a key article prominently.', defaults: { snippetLength: 180, showThumbnail: true } },
+            ReportAbuse: { idPrefix: 'ReportAbuse', version: 2, defaultTitle: 'Report Abuse', icon: 'fa-flag', desc: 'Standard Blogger report abuse link.', defaults: {} }
+        };
+
+        const SECTION_TYPE_LABELS = {
+            header: 'Header Section',
+            navigation: 'Navigation Section',
+            featured: 'Featured Section',
+            main: 'Main Content Section',
+            'sidebar-left': 'Left Sidebar Section',
+            'sidebar-right': 'Right Sidebar Section',
+            sidebar: 'Sidebar Section (Legacy)',
+            footer: 'Footer Section'
+        };
+
+        const WIDGETS_WITHOUT_TITLE = ['Header', 'Blog', 'PageList', 'Attribution', 'ReportAbuse', 'ContactForm'];
+        const SAMPLE_POSTS = [
+            { title: 'Mastering Native Blogger Template Architecture', snippet: 'Discover advanced strategies for compiling canonical JSON schemas directly into valid Blogger XML templates without SAX errors.' },
+            { title: 'Designing a 1:1 Preview Pipeline with Shadow DOM', snippet: 'Isolate exported theme CSS from the builder shell so what you see locally is exactly what Blogger renders after upload.' },
+            { title: 'Why Layout Sections Still Matter in 2026', snippet: 'Sections keep gadgets addressable, reorderable, and safe to move between the main column and the sidebar.' },
+            { title: 'Shipping a Fast Blogspot Theme', snippet: 'Practical rules for trimming CSS, deferring scripts, and keeping the theme installable across layouts versions.' },
+            { title: 'A Practical Guide to Blogger Data Tags', snippet: 'Learn which tags are valid inside Header, Blog, PageList, and LinkList widgets before you upload.' },
+            { title: 'Building a Theme Customizer That Survives Export', snippet: 'Keep colors and typography in one source of truth that drives both the preview canvas and the b:skin block.' }
+        ];
+
+        const SAMPLE_ARCHIVE_MONTHS = [
+            { label: 'October 2026', count: 12 },
+            { label: 'September 2026', count: 8 },
+            { label: 'August 2026', count: 15 },
+            { label: 'July 2026', count: 6 }
+        ];
+
+        const SAMPLE_LABELS = [
+            { name: 'Technology', count: 12 },
+            { name: 'Gadgets', count: 8 },
+            { name: 'AI & ML', count: 5 },
+            { name: 'Web Design', count: 9 },
+            { name: 'Blogger', count: 3 },
+            { name: 'Tutorials', count: 7 }
+        ];
+
+        class BloggerThemeBuilderPro {
+            constructor() {
+                this.history = [];
+                this.historyIndex = -1;
+                this.selectedId = null;
+                this.selectedSectionId = null;
+                this.pendingAction = null;
+                this.currentViewport = 'desktop';
+                this.activeTab = 'elements';
+                this.previewMode = 'theme';
+                this.panelLeftHidden = false;
+                this.panelRightHidden = false;
+
+                this.schema = {
+                    metadata: {
+                        name: 'Modern Mag Pro v2.6',
+                        version: '2.6.0',
+                        author: 'Blogger Theme Studio Pro',
+                        description: 'Professional 1:1 Synchronized Blogger Theme Schema'
+                    },
+                    customizer: JSON.parse(JSON.stringify(DEFAULT_CUSTOMIZER)),
+                    sections: [
+                        { id: 'header-sec', name: 'Header Section', type: 'header', widgets: [
+                            { id: 'Header1', type: 'Header', title: 'TechPulse Daily', settings: { description: 'Professional Magazine & Technology Journal', showImage: true, imageLogo: 'https://placehold.co/180x50/F57C00/FFFFFF?text=TechPulse' } }
+                        ]},
+                        { id: 'nav-sec', name: 'Navigation Section', type: 'navigation', widgets: [
+                            { id: 'PageList1', type: 'PageList', title: 'Pages', settings: { showHome: true, pages: ['Home', 'Technology', 'Gadgets', 'Reviews', 'Contact'] } }
+                        ]},
+                        { id: 'featured-sec', name: 'Featured Section', type: 'featured', widgets: [
+                            { id: 'FeaturedPost1', type: 'FeaturedPost', title: 'Editor\u2019s Pick', settings: { snippetLength: 180, showThumbnail: true } }
+                        ]},
+                        { id: 'main-sec', name: 'Main Content Section', type: 'main', widgets: [
+                            { id: 'Blog1', type: 'Blog', title: 'Blog Posts', settings: { postsPerPage: 6, showAuthor: true, showTimestamp: true, showLabels: true, readMoreText: 'Continue Reading →' } }
+                        ]},
+                        { id: 'sidebar-left-sec', name: 'Left Sidebar Section', type: 'sidebar-left', widgets: [
+                            { id: 'PopularPosts1', type: 'PopularPosts', title: 'Trending Articles', settings: { maxPosts: 4, showThumbnail: true, showSnippet: false } },
+                            { id: 'Label1', type: 'Label', title: 'Categories', settings: { displayMode: 'cloud', showCount: true } }
+                        ]},
+                        { id: 'sidebar-right-sec', name: 'Right Sidebar Section', type: 'sidebar-right', widgets: [
+                            { id: 'BlogSearch1', type: 'BlogSearch', title: 'Search Blog', settings: { placeholder: 'Search articles...' } },
+                            { id: 'BlogArchive1', type: 'BlogArchive', title: 'Archives', settings: { hierarchy: 'tree' } }
+                        ]},
+                        { id: 'footer-sec', name: 'Footer Section', type: 'footer', widgets: [
+                            { id: 'LinkList1', type: 'LinkList', title: 'Quick Links', settings: { links: [{ name: 'Privacy Policy', url: '#' }, { name: 'Terms of Use', url: '#' }] } },
+                            { id: 'Attribution1', type: 'Attribution', title: 'Attribution', settings: { creditText: 'Designed with Blogger Theme Builder Pro.' } }
+                        ]}
+                    ],
+                    activePageType: 'index'
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.saveState();
+                this.renderAll();
+                this.setupEventListeners();
+                this.showToast('Blogger Theme Builder Pro ready. Select a gadget to edit its properties.', 'success');
+            }
+
+            saveState() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.history = this.history.slice(0, this.historyIndex + 1);
+                }
+                this.history.push(JSON.parse(JSON.stringify(this.schema)));
+                if (this.history.length > 60) {
+                    this.history.shift();
+                }
+                this.historyIndex = this.history.length - 1;
+            }
+
+            undo() {
+                if (this.historyIndex <= 0) {
+                    this.showToast('Nothing to undo.', 'info');
+                    return;
+                }
+                this.historyIndex--;
+                this.schema = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                this.normalizeSelection();
+                this.renderAll();
+                this.showToast('Action undone.', 'info');
+            }
+
+            redo() {
+                if (this.historyIndex >= this.history.length - 1) {
+                    this.showToast('Nothing to redo.', 'info');
+                    return;
+                }
+                this.historyIndex++;
+                this.schema = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+                this.normalizeSelection();
+                this.renderAll();
+                this.showToast('Action redone.', 'info');
+            }
+
+            normalizeSelection() {
+                if (this.selectedId && !this.findWidget(this.selectedId)) {
+                    this.selectedId = null;
+                    this.selectedSectionId = null;
+                }
+                if (this.selectedSectionId && !this.schema.sections.some((sec) => sec.id === this.selectedSectionId)) {
+                    this.selectedSectionId = null;
+                }
+            }
+
+            switchTab(tabName) {
+                this.activeTab = tabName;
+                ['elements', 'layout', 'customizer', 'xml'].forEach((tab) => {
+                    const btn = document.getElementById(`tab-btn-${tab}`);
+                    if (!btn) return;
+                    const active = tab === tabName;
+                    btn.className = active
+                        ? 'py-2 font-medium text-slate-200 bg-slate-800 rounded transition flex flex-col items-center justify-center'
+                        : 'py-2 font-medium text-slate-400 hover:text-white transition flex flex-col items-center justify-center';
+                    const icon = btn.querySelector('i');
+                    if (icon) icon.classList.toggle('text-blogger-orange', active);
+                });
+                this.renderLeftPanel();
+            }
+
+            setViewport(viewport) {
+                this.currentViewport = viewport;
+                const frame = document.getElementById('canvas-viewport-frame');
+                ['desktop', 'tablet', 'mobile'].forEach((vp) => {
+                    const btn = document.getElementById(`vp-${vp}`);
+                    if (!btn) return;
+                    btn.className = vp === viewport
+                        ? 'px-3 py-1 rounded text-xs font-medium text-slate-200 bg-slate-700 shadow transition flex items-center space-x-1.5'
+                        : 'px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+                });
+                if (!frame) return;
+                if (viewport === 'tablet') frame.style.maxWidth = '768px';
+                else if (viewport === 'mobile') frame.style.maxWidth = '375px';
+                else frame.style.maxWidth = '1440px';
+            }
+
+            setPageType(pageType) {
+                this.schema.activePageType = pageType;
+                ['index', 'item', 'archive', 'static_page'].forEach((pt) => {
+                    const btn = document.getElementById(`pt-${pt}`);
+                    if (!btn) return;
+                    btn.className = pt === pageType
+                        ? 'px-2.5 py-1 rounded bg-slate-700 text-white font-medium transition'
+                        : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+                });
+                this.renderCanvas();
+            }
+
+            setPreviewMode(mode) {
+                this.previewMode = mode === 'layout' ? 'layout' : 'theme';
+                ['theme', 'layout'].forEach((m) => {
+                    const btn = document.getElementById(`pm-${m}`);
+                    if (!btn) return;
+                    btn.className = m === this.previewMode
+                        ? 'px-2.5 py-1 rounded bg-slate-700 text-white font-medium transition flex items-center space-x-1.5'
+                        : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+                });
+                const pageGroup = document.getElementById('page-type-group');
+                if (pageGroup) {
+                    pageGroup.classList.toggle('opacity-40', this.previewMode === 'layout');
+                    pageGroup.classList.toggle('pointer-events-none', this.previewMode === 'layout');
+                }
+                const state = document.getElementById('canvas-mode-state');
+                if (state) {
+                    state.textContent = this.previewMode === 'layout'
+                        ? 'Blogger Layout · Tata Letak'
+                        : 'Live 1:1 Schema Synchronized';
+                }
+                this.renderCanvas();
+            }
+
+            togglePanel(side) {
+                if (side === 'left') {
+                    this.panelLeftHidden = !this.panelLeftHidden;
+                    const panel = document.getElementById('left-panel');
+                    const btn = document.getElementById('panel-toggle-left');
+                    if (panel) panel.classList.toggle('hidden', this.panelLeftHidden);
+                    if (btn) {
+                        btn.innerHTML = this.panelLeftHidden
+                            ? '<i class="fa-solid fa-chevron-right"></i><span class="hidden sm:inline">Show Left</span>'
+                            : '<i class="fa-solid fa-chevron-left"></i><span class="hidden sm:inline">Left</span>';
+                        btn.title = this.panelLeftHidden
+                            ? 'Show left panel (gadgets)'
+                            : 'Hide left panel (gadgets)';
+                        btn.className = this.panelLeftHidden
+                            ? 'px-2 py-1 rounded text-xs font-medium text-emerald-400 hover:text-white bg-emerald-600/20 transition flex items-center space-x-1'
+                            : 'px-2 py-1 rounded text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-700 transition flex items-center space-x-1';
+                    }
+                } else {
+                    this.panelRightHidden = !this.panelRightHidden;
+                    const panel = document.getElementById('right-panel');
+                    const btn = document.getElementById('panel-toggle-right');
+                    if (panel) panel.classList.toggle('hidden', this.panelRightHidden);
+                    if (btn) {
+                        btn.innerHTML = this.panelRightHidden
+                            ? '<i class="fa-solid fa-chevron-left"></i><span class="hidden sm:inline">Show Right</span>'
+                            : '<i class="fa-solid fa-chevron-right"></i><span class="hidden sm:inline">Right</span>';
+                        btn.title = this.panelRightHidden
+                            ? 'Show right panel (inspector)'
+                            : 'Hide right panel (inspector)';
+                        btn.className = this.panelRightHidden
+                            ? 'px-2 py-1 rounded text-xs font-medium text-emerald-400 hover:text-white bg-emerald-600/20 transition flex items-center space-x-1'
+                            : 'px-2 py-1 rounded text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-700 transition flex items-center space-x-1';
+                    }
+                }
+            }
+
+            renderAll() {
+                this.renderLeftPanel();
+                this.renderCanvas();
+                this.renderPropertiesInspector();
+            }
+
+            renderLeftPanel() {
+                const container = document.getElementById('left-tab-content');
+                if (!container) return;
+                const scrollTop = container.scrollTop;
+                if (this.activeTab === 'layout') container.innerHTML = this.renderLayoutPanel();
+                else if (this.activeTab === 'customizer') container.innerHTML = this.renderCustomizerPanel();
+                else if (this.activeTab === 'xml') container.innerHTML = this.renderXmlPanel();
+                else container.innerHTML = this.renderElementsPanel();
+                if (this.activeTab === 'xml') this.compileBloggerXML();
+                container.scrollTop = scrollTop;
+            }
+
+            renderElementsPanel() {
+                let html = `<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Blogger Native Gadgets</div>`;
+                html += `<p class="text-[11px] text-slate-400 mb-3">Click a gadget to add it to the most suitable section. Select any gadget afterwards to edit its settings.</p>`;
+                html += `<div class="grid grid-cols-1 gap-2">`;
+                for (const [type, info] of Object.entries(NATIVE_WIDGET_REGISTRY)) {
+                    html += `
+                        <div onclick="app.addWidget('${type}')" class="bg-slate-900 hover:bg-slate-700/80 border border-slate-700 hover:border-blogger-orange p-2.5 rounded-lg cursor-pointer transition flex items-center justify-between group">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="w-8 h-8 rounded bg-slate-800 text-blogger-orange flex items-center justify-center group-hover:bg-blogger-orange group-hover:text-white transition">
+                                    <i class="fa-solid ${info.icon}"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-200">${escapeHtml(info.defaultTitle)}</div>
+                                    <div class="text-[10px] text-slate-400 truncate max-w-[160px]">${escapeHtml(info.desc)}</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-plus text-xs text-slate-500 group-hover:text-white"></i>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+                return html;
+            }
+
+            renderLayoutPanel() {
+                let html = `<div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Blogger Layout Sections</span>
+                    <button onclick="app.promptAddSection()" class="text-[11px] bg-blogger-orange hover:bg-blogger-darkorange text-white px-2 py-1 rounded transition"><i class="fa-solid fa-plus mr-1"></i> Section</button>
+                </div>`;
+                html += `<p class="text-[11px] text-slate-400 mb-3">Reorder gadgets and sections. Sidebar sections are grouped into the left/right columns; the canvas and exported XML use the same column order.</p>`;
+                html += `<div class="space-y-3">`;
+
+                this.schema.sections.forEach((sec, idx) => {
+                    html += `
+                        <div class="bg-slate-900 border ${this.selectedSectionId === sec.id ? 'border-blogger-orange' : 'border-slate-700'} rounded-lg p-2.5">
+                            <div class="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-800">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-blogger-orange uppercase truncate">${escapeHtml(sec.name)}</div>
+                                    <div class="text-[10px] text-slate-400 font-mono truncate">#${escapeHtml(sec.id)} · ${sec.widgets.length} gadget(s)</div>
+                                </div>
+                                <div class="flex items-center space-x-1 shrink-0">
+                                    ${idx > 0 ? `<button onclick="app.moveSection(${idx}, -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs" title="Move section up"><i class="fa-solid fa-chevron-up"></i></button>` : ''}
+                                    ${idx < this.schema.sections.length - 1 ? `<button onclick="app.moveSection(${idx}, 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs" title="Move section down"><i class="fa-solid fa-chevron-down"></i></button>` : ''}
+                                    <button onclick="app.promptAddWidgetToSection('${sec.id}')" class="w-6 h-6 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center text-xs" title="Add gadget"><i class="fa-solid fa-plus"></i></button>
+                                    <button onclick="app.removeSection('${sec.id}')" class="w-6 h-6 rounded bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center text-xs" title="Delete section"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                    `;
+
+                    if (sec.widgets.length === 0) {
+                        html += `<div class="text-[11px] text-slate-500 italic p-1">No gadgets in this section yet.</div>`;
+                    } else {
+                        sec.widgets.forEach((widget, widgetIdx) => {
+                            const info = NATIVE_WIDGET_REGISTRY[widget.type];
+                            html += `
+                                <div onclick="app.selectWidget('${widget.id}')" class="flex items-center justify-between gap-2 bg-slate-800/80 hover:bg-slate-700 p-2 rounded cursor-pointer border ${this.selectedId === widget.id ? 'border-blogger-orange' : 'border-slate-700/60'}">
+                                    <div class="flex items-center space-x-2 min-w-0">
+                                        <i class="fa-solid ${info ? info.icon : 'fa-puzzle-piece'} text-blogger-orange text-xs"></i>
+                                        <span class="text-xs text-slate-200 font-medium truncate">${escapeHtml(widget.title)}</span>
+                                        <span class="text-[10px] text-slate-400 font-mono truncate">(${escapeHtml(widget.id)})</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 shrink-0">
+                                        ${widgetIdx > 0 ? `<button onclick="event.stopPropagation(); app.moveWidget('${sec.id}', ${widgetIdx}, -1)" class="text-slate-400 hover:text-white px-1" title="Move up"><i class="fa-solid fa-caret-up"></i></button>` : ''}
+                                        ${widgetIdx < sec.widgets.length - 1 ? `<button onclick="event.stopPropagation(); app.moveWidget('${sec.id}', ${widgetIdx}, 1)" class="text-slate-400 hover:text-white px-1" title="Move down"><i class="fa-solid fa-caret-down"></i></button>` : ''}
+                                        <button onclick="event.stopPropagation(); app.removeWidget('${sec.id}', '${widget.id}')" class="text-red-400 hover:text-red-300 px-1" title="Delete gadget"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `</div></div>`;
+                });
+
+                html += `</div>`;
+                return html;
+            }
+
+            renderCustomizerPanel() {
+                const c = this.schema.customizer.colors;
+                const t = this.schema.customizer.typography;
+                const colorFields = [
+                    ['primary', 'Primary'],
+                    ['secondary', 'Secondary'],
+                    ['background', 'Background'],
+                    ['surface', 'Surface'],
+                    ['text', 'Text'],
+                    ['muted', 'Muted Text'],
+                    ['border', 'Border'],
+                    ['links', 'Links']
+                ];
+
+                let html = `<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Global Theme Customizer</div>`;
+                html += `<div class="space-y-4">
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-3">
+                        <div class="text-xs font-bold text-slate-200">Color Palette</div>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                `;
+
+                colorFields.forEach(([key, label]) => {
+                    html += `
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">${label}</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="color" value="${c[key]}" onchange="app.updateColor('${key}', this.value)" class="w-6 h-6 rounded border-0 cursor-pointer bg-transparent">
+                                <span class="font-mono text-[11px] text-slate-300">${escapeHtml(c[key])}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-3">
+                        <div class="text-xs font-bold text-slate-200">Typography &amp; Dimensions</div>
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Font Family</label>
+                                <select onchange="app.updateTypography('fontFamily', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200">
+                                    <option value="'Inter', sans-serif" ${t.fontFamily.includes('Inter') ? 'selected' : ''}>Inter (Modern Sans)</option>
+                                    <option value="'Playfair Display', serif" ${t.fontFamily.includes('Playfair') ? 'selected' : ''}>Playfair Display (Editorial)</option>
+                                    <option value="system-ui, sans-serif" ${t.fontFamily.includes('system-ui') ? 'selected' : ''}>System Default</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Heading Size</label>
+                                    <input type="text" value="${escapeHtml(t.headingSize)}" onchange="app.updateTypography('headingSize', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Body Size</label>
+                                    <input type="text" value="${escapeHtml(t.bodySize)}" onchange="app.updateTypography('bodySize', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Main Container Width</label>
+                                <input type="text" value="${escapeHtml(t.mainWidth)}" onchange="app.updateTypography('mainWidth', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Post Column Width</label>
+                                <input type="text" value="${escapeHtml(t.postWidth)}" onchange="app.updateTypography('postWidth', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Left Sidebar</label>
+                                    <input type="text" value="${escapeHtml(t.sidebarLeftWidth)}" onchange="app.updateTypography('sidebarLeftWidth', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block mb-1">Right Sidebar</label>
+                                    <input type="text" value="${escapeHtml(t.sidebarRightWidth)}" onchange="app.updateTypography('sidebarRightWidth', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 font-mono">
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-500">Default three-column ratio: left 20% / post 60% / right 20%. When one sidebar is empty, the post column fills the remaining space.</p>
+                        </div>
+                    </div>
+                    <button onclick="app.resetCustomizer()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded text-xs font-semibold transition">Reset Palette &amp; Typography</button>
+                </div>`;
+
+                return html;
+            }
+
+            renderXmlPanel() {
+                return `<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Blogger XML Compiler</div>
+                    <p class="text-[11px] text-slate-400 mb-3">Live canonical Blogger XML generated from the active schema. Export or copy it straight into Blogger.</p>
+                    <button onclick="app.compileBloggerXML()" class="w-full bg-blogger-orange hover:bg-blogger-darkorange text-white py-2 rounded text-xs font-semibold shadow transition mb-3">Re-compile XML Source</button>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                        <span>Output preview</span>
+                        <span id="xml-meta" class="font-mono">—</span>
+                    </div>
+                    <pre id="xml-quick-preview" class="bg-slate-900 border border-slate-700 rounded p-2 text-[10px] code-font text-emerald-400 h-72 overflow-auto custom-scrollbar whitespace-pre select-text"></pre>`;
+            }
+
+            getSidebarSections() {
+                const left = [];
+                const right = [];
+                this.schema.sections.forEach((sec) => {
+                    if (sec.type === 'sidebar-left') {
+                        left.push(sec);
+                    } else if (sec.type === 'sidebar-right' || sec.type === 'sidebar') {
+                        right.push(sec);
+                    }
+                });
+                return { left, right };
+            }
+
+            isSidebarType(type) {
+                return type === 'sidebar' || type === 'sidebar-left' || type === 'sidebar-right';
+            }
+
+            buildContentColumns() {
+                const { left, right } = this.getSidebarSections();
+                const tracks = [];
+                if (left.length) tracks.push('minmax(0, var(--sidebar-left-width, 20%))');
+                tracks.push(left.length && right.length ? 'minmax(0, var(--post-width, 60%))' : 'minmax(0, 1fr)');
+                if (right.length) tracks.push('minmax(0, var(--sidebar-right-width, 20%))');
+                return tracks.join(' ');
+            }
+
+            buildThemeCSS(rootSelector = 'body', breakpoint = '@media (max-width: 600px)') {
+                const c = this.schema.customizer.colors;
+                const t = this.schema.customizer.typography;
+                return `
+        ${rootSelector} {
+            --primary-color: ${c.primary};
+            --secondary-color: ${c.secondary};
+            --bg-color: ${c.background};
+            --surface-color: ${c.surface};
+            --text-color: ${c.text};
+            --muted-color: ${c.muted};
+            --border-color: ${c.border};
+            --link-color: ${c.links};
+            --font-family: ${t.fontFamily};
+            --heading-size: ${t.headingSize};
+            --body-size: ${t.bodySize};
+            --main-width: ${t.mainWidth};
+            --post-width: ${t.postWidth};
+            --sidebar-left-width: ${t.sidebarLeftWidth};
+            --sidebar-right-width: ${t.sidebarRightWidth};
+            --sidebar-width: ${t.sidebarRightWidth};
+            --column-space: clamp(16px, 2.5vw, 32px);
+            margin: 0;
+            padding: 0;
+            width: auto;
+            max-width: 100%;
+            font-family: var(--font-family);
+            font-size: var(--body-size);
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        html { width: auto; max-width: 100%; overflow-x: hidden; }
+        *, *::before, *::after { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        iframe, video, embed, object, table { max-width: 100%; }
+        pre { max-width: 100%; overflow-x: auto; }
+        input, textarea, select, button { max-width: 100%; }
+        a { color: var(--link-color); }
+        h1, h2, h3, h4 { line-height: 1.25; margin: 0 0 12px; }
+        h1 { font-size: var(--heading-size); }
+        .main-wrapper, .footer-wrapper { width: 100%; max-width: 100%; min-width: 0; margin: 0 auto; overflow-x: hidden; }
+        .main-wrapper { max-width: var(--main-width); max-width: min(100%, var(--main-width)); }
+        .section-wrap { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow-x: hidden; }
+        .section-wrap > .section, .section-wrap > .section > .widget, .section-wrap > .section > .widget > .widget-content { width: auto; max-width: 100%; min-width: 0; box-sizing: border-box; }
+        .section-wrap > .section { margin: 0; padding: 0; }
+        .content-container, .posts-col, .sidebar-left-col, .sidebar-right-col, .sidebar-col, .blog-posts, .post-item, .post-body, .blog-header-inner, .blog-heading, .featured-post, .popular-posts, .page-list, .link-list, .label-list, .archive-list, .blog-search-form, .contact-form-widget, .profile-widget, .html-widget-body, .image-widget, .attribution, .standard-widget-body { box-sizing: border-box; max-width: 100%; min-width: 0; }
+        .blog-header-inner > *, .content-container > *, .section-navigation ul > *, .section-footer > .section > * { min-width: 0; max-width: 100%; }
+        .widget-content > *, .post-body > * { max-width: 100%; }
+        @supports (overflow: clip) {
+            html, ${rootSelector}, .main-wrapper, .footer-wrapper, .section-wrap { overflow-x: clip; }
+        }
+        ${this.buildLayoutGuardCSS()}
+        .section-wrap.section-header { background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); padding: 20px 24px; }
+        .blog-header-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .blog-heading { display: flex; flex-direction: column; min-width: 0; }
+        .blog-logo { height: 40px; width: auto; object-fit: contain; }
+        .blog-title { font-size: var(--heading-size); color: var(--primary-color); text-decoration: none; margin: 0; }
+        .blog-description { margin: 4px 0 0; font-size: 13px; color: var(--muted-color); }
+        .section-wrap.section-navigation { background-color: #202124; color: #ffffff; padding: 12px 24px; }
+        .section-navigation .widget-content { margin-bottom: 0; }
+        .section-navigation ul { display: flex; flex-wrap: wrap; gap: 20px; margin: 0; padding: 0; list-style: none; }
+        .section-navigation a { color: #ffffff; text-decoration: none; font-size: 13px; }
+        .section-navigation a:hover { color: var(--primary-color); }
+        .section-wrap.section-footer { background-color: #202124; color: #9aa0a6; padding: 28px 24px; font-size: 13px; }
+        .section-wrap.section-footer > .section { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+        .section-footer .widget-content { margin-bottom: 0; }
+        .section-footer a { color: #cbd5e1; text-decoration: none; }
+        .section-footer a:hover { color: #ffffff; }
+        .content-container { display: grid; width: 100%; max-width: 100%; min-width: 0; grid-template-columns: ${this.buildContentColumns()}; gap: 0; padding: 28px 16px; align-items: start; }
+        .posts-col { width: 100%; max-width: 100%; min-width: 0; padding: 0 var(--column-space); }
+        .sidebar-left-col, .sidebar-right-col, .sidebar-col { width: 100%; max-width: 100%; min-width: 0; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; overflow: hidden; display: flex; flex-direction: column; gap: 14px; }
+        .post-item { background-color: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .post-item:last-child { margin-bottom: 0; }
+        .post-thumb { display: block; width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 14px; }
+        .post-title { font-size: 20px; margin: 0 0 8px; }
+        .post-title a { color: var(--text-color); text-decoration: none; }
+        .post-title a:hover { color: var(--primary-color); }
+        .post-meta, .post-snippet { color: var(--muted-color); font-size: 13px; }
+        .post-body { font-size: 14px; }
+        .post-body p { margin: 0 0 12px; }
+        .post-labels { margin-top: 14px; }
+        .read-more { display: inline-block; margin-top: 12px; font-weight: 600; color: var(--primary-color); text-decoration: none; }
+        .blog-pager-older-link { display: inline-block; margin-top: 16px; padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 999px; font-size: 13px; text-decoration: none; background-color: #ffffff; }
+        .featured-post { background-image: linear-gradient(120deg, var(--primary-color), #F9A825); color: #ffffff; border-radius: 16px; padding: 28px; margin: 24px 16px; display: flex; flex-direction: column; gap: 12px; }
+        .featured-post h2 { margin: 0; font-size: 22px; }
+        .featured-post a { color: #ffffff; text-decoration: none; }
+        .featured-post p { margin: 0; font-size: 13px; color: rgba(255, 255, 255, .92); }
+        .featured-image { width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; display: block; }
+        .page-list, .link-list, .label-list, .archive-list { list-style: none; margin: 0; padding: 0; }
+        .popular-posts { display: flex; flex-direction: column; gap: 12px; }
+        .popular-post { display: flex; align-items: center; gap: 10px; }
+        .popular-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex: 0 0 56px; }
+        .popular-post a { text-decoration: none; font-size: 13px; }
+        .label-link { display: inline-block; margin: 0 6px 6px 0; padding: 4px 10px; border: 1px solid var(--border-color); border-radius: 999px; font-size: 12px; text-decoration: none; background-color: #ffffff; }
+        .label-count { font-size: 11px; color: var(--muted-color); margin-left: 4px; }
+        .blog-search-form { display: flex; gap: 8px; }
+        .blog-search-form input[type='text'] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px; }
+        .blog-search-form input[type='submit'] { padding: 8px 14px; border: 0; border-radius: 8px; background-color: var(--primary-color); color: #ffffff; cursor: pointer; font-weight: 600; font-family: inherit; }
+        .profile-widget { display: flex; flex-direction: column; gap: 6px; }
+        .profile-name { font-weight: 600; font-size: 13px; }
+        .profile-widget p { margin: 0; font-size: 12px; color: var(--muted-color); }
+        .image-widget img { display: block; width: 100%; border-radius: 8px; }
+        .html-widget-body { font-size: 13px; }
+        .attribution { font-size: 12px; }
+        .contact-form-widget { display: flex; flex-direction: column; gap: 8px; }
+        .contact-form-widget input, .contact-form-widget textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px; }
+        .contact-form-widget input[type='submit'] { background-color: var(--primary-color); color: #ffffff; border: 0; font-weight: 600; cursor: pointer; }
+        .report-abuse { font-size: 12px; }
+        .standard-widget-body { font-size: 13px; color: var(--muted-color); }
+        .archive-list li, .link-list li, .page-list li { margin: 0; }
+        .archive-list a, .link-list a { font-size: 13px; text-decoration: none; }
+        .widget-content { max-width: 100%; min-width: 0; margin-bottom: 16px; overflow-wrap: anywhere; }
+        .widget-content > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 10px; }
+        ${breakpoint} {
+            .content-container { grid-template-columns: minmax(0, 1fr); row-gap: var(--column-space); }
+            .posts-col { padding: 0; order: 1; }
+            .sidebar-left-col { width: 100%; max-width: 100%; order: 2; }
+            .sidebar-right-col, .sidebar-col { width: 100%; max-width: 100%; order: 3; }
+        }`;
+            }
+
+            buildLayoutGuardCSS() {
+                const t = this.schema.customizer.typography;
+                const { left: leftSidebarSections, right: rightSidebarSections } = this.getSidebarSections();
+                const postWidth = t.postWidth || '60%';
+                const leftWidth = t.sidebarLeftWidth || '20%';
+                const rightWidth = t.sidebarRightWidth || '20%';
+                const hasLeft = leftSidebarSections.length > 0;
+                const hasRight = rightSidebarSections.length > 0;
+                const effectivePostWidth = hasLeft && hasRight
+                    ? postWidth
+                    : (hasLeft || hasRight ? `calc(100% - ${hasLeft ? leftWidth : rightWidth})` : '100%');
+                return `
+        body#layout#layout, body#layout#layout #layout#layout,
+        #layout#layout { width: auto !important; max-width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; overflow-x: hidden !important; box-sizing: border-box !important; }
+        body#layout#layout *, body#layout#layout *::before, body#layout#layout *::after,
+        #layout#layout *, #layout#layout *::before, #layout#layout *::after { box-sizing: border-box !important; max-width: 100% !important; }
+        body#layout#layout .section, body#layout#layout .widget, body#layout#layout .widget-content,
+        #layout#layout .section, #layout#layout .widget, #layout#layout .widget-content { width: auto !important; max-width: 100% !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box !important; }
+        body#layout#layout .widget-content, #layout#layout .widget-content { overflow-wrap: anywhere !important; }
+        body#layout .main-wrapper, body#layout .footer-wrapper,
+        #layout .main-wrapper, #layout .footer-wrapper,
+        body#layout .section-wrap, #layout .section-wrap,
+        body#layout .content-container, #layout .content-container,
+        body#layout .posts-col, #layout .posts-col,
+        body#layout .sidebar-left-col, #layout .sidebar-left-col,
+        body#layout .sidebar-right-col, #layout .sidebar-right-col,
+        body#layout .sidebar-col, #layout .sidebar-col,
+        body#layout .section-wrap > .section, #layout .section-wrap > .section,
+        body#layout .section-wrap > .section > .widget, #layout .section-wrap > .section > .widget,
+        body#layout .section-wrap > .section > .widget > .widget-content, #layout .section-wrap > .section > .widget > .widget-content { width: auto !important; max-width: 100% !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box !important; overflow: visible !important; }
+        body#layout#layout .content-container, #layout#layout .content-container { display: block !important; width: auto !important; max-width: 100% !important; min-width: 0 !important; padding: 28px 16px !important; }
+        body#layout#layout .content-container::after, #layout#layout .content-container::after { content: '' !important; display: block !important; clear: both !important; }
+        body#layout#layout .sidebar-left-col, #layout#layout .sidebar-left-col { display: block !important; float: left !important; width: ${leftWidth} !important; max-width: ${leftWidth} !important; min-width: 0 !important; box-sizing: border-box !important; }
+        body#layout#layout .posts-col, #layout#layout .posts-col { display: block !important; float: left !important; width: ${effectivePostWidth} !important; max-width: ${effectivePostWidth} !important; min-width: 0 !important; padding: 0 var(--column-space, 32px) !important; box-sizing: border-box !important; }
+        body#layout#layout .sidebar-right-col, body#layout#layout .sidebar-col,
+        #layout#layout .sidebar-right-col, #layout#layout .sidebar-col { display: block !important; float: right !important; width: ${rightWidth} !important; max-width: ${rightWidth} !important; min-width: 0 !important; box-sizing: border-box !important; }`;
+            }
+
+            renderCanvas() {
+                const root = document.getElementById('canvas-root');
+                if (!root) return;
+
+                const shadow = root.shadowRoot || root.attachShadow({ mode: 'open' });
+                const scrollTop = root.scrollTop;
+
+                shadow.innerHTML = this.previewMode === 'layout' ? this.renderLayoutCanvas() : this.renderThemeCanvas();
+
+                root.scrollTop = scrollTop;
+                this.bindCanvasEvents(shadow);
+                this.applySelectionHighlight();
+            }
+
+            bindCanvasEvents(shadow) {
+                if (shadow.__btbpBound) return;
+                shadow.__btbpBound = true;
+                shadow.addEventListener('click', (event) => {
+                    const target = event.target;
+                    const anchor = target && target.closest ? target.closest('a') : null;
+                    if (anchor) event.preventDefault();
+                });
+            }
+
+            renderThemeCanvas() {
+                const c = this.schema.customizer.colors;
+                const { left: leftSidebarSections, right: rightSidebarSections } = this.getSidebarSections();
+                const hasMainSection = this.schema.sections.some((sec) => sec.type === 'main');
+                const hasSidebarSections = leftSidebarSections.length > 0 || rightSidebarSections.length > 0;
+                let columnsRendered = false;
+
+                let html = `
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style id="canvas-dynamic-styles">
+                        ${this.buildThemeCSS('.theme-body', '@container (max-width: 600px)')}
+                        .theme-frame { container-type: inline-size; width: 100%; min-height: 100%; background-color: ${c.background}; }
+                        .theme-body { width: auto; min-height: 100%; }
+                        .widget-node { cursor: pointer; outline: 1px dashed transparent; outline-offset: -1px; transition: outline-color .15s ease; }
+                        .widget-node:hover { outline-color: rgba(245, 124, 0, .55); }
+                        .widget-node.is-selected { outline: 2px solid #F57C00; }
+                        .section-empty { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 16px; text-align: center; font-size: 12px; color: #64748b; background-color: #ffffff; cursor: pointer; }
+                        .section-empty:hover { border-color: var(--primary-color); color: var(--primary-color); }
+                        .section-navigation .section-empty, .section-footer .section-empty { background-color: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .35); color: #e2e8f0; }
+                    </style>
+                    <div class="theme-frame"><div class="theme-body"><div class="main-wrapper">
+                `;
+
+                this.schema.sections.forEach((sec) => {
+                    if (this.isSidebarType(sec.type) && hasMainSection) return;
+                    if (sec.type === 'footer') return;
+
+                    if (sec.type === 'main' && hasSidebarSections && !columnsRendered) {
+                        columnsRendered = true;
+                        html += `<div class="content-container">`;
+                        if (leftSidebarSections.length) {
+                            html += `<div class="sidebar-left-col">`;
+                            leftSidebarSections.forEach((sidebarSec) => {
+                                html += this.renderPreviewSection(sidebarSec);
+                            });
+                            html += `</div>`;
+                        }
+                        html += `<div class="posts-col">${this.renderPreviewSection(sec)}</div>`;
+                        if (rightSidebarSections.length) {
+                            html += `<div class="sidebar-right-col">`;
+                            rightSidebarSections.forEach((sidebarSec) => {
+                                html += this.renderPreviewSection(sidebarSec);
+                            });
+                            html += `</div>`;
+                        }
+                        html += `</div>`;
+                        return;
+                    }
+
+                    html += this.renderPreviewSection(sec);
+                });
+
+                html += `</div>`;
+
+                const footerSections = this.schema.sections.filter((sec) => sec.type === 'footer');
+                if (footerSections.length) {
+                    html += `<div class="footer-wrapper">`;
+                    footerSections.forEach((sec) => {
+                        html += this.renderPreviewSection(sec);
+                    });
+                    html += `</div>`;
+                }
+
+                html += `</div></div>`;
+                return html;
+            }
+
+            renderPreviewSection(sec) {
+                const inner = sec.widgets.length
+                    ? sec.widgets.map((widget) => this.renderPreviewWidget(widget)).join('')
+                    : this.renderSectionPlaceholder(sec);
+                const bloggerClasses = this.getBloggerSectionClassName(sec.type);
+                return `<div class="section-wrap section-${sec.type}" data-section-id="${escapeHtml(sec.id)}"><div class="${escapeHtml(bloggerClasses)}" id="preview-${escapeHtml(sec.id)}">${inner}</div></div>`;
+            }
+
+            renderPreviewWidget(widget) {
+                const typeClass = widget.type.toLowerCase();
+                const showTitle = WIDGETS_WITHOUT_TITLE.indexOf(widget.type) === -1 && String(widget.title || '').trim();
+                const heading = showTitle ? `<h2>${escapeHtml(widget.title)}</h2>` : '';
+                return `<div class="widget-node widget widget-${typeClass}" data-widget-id="${widget.id}" onclick="app.selectWidget('${widget.id}')">
+                    <div class="widget-content widget-${typeClass}-content">${heading}${this.renderWidgetBody(widget)}</div>
+                </div>`;
+            }
+
+            renderWidgetBody(widget) {
+                if (widget.type === 'Header') {
+                    const logo = widget.settings.showImage
+                        ? `<img class="blog-logo" src="${escapeHtml(widget.settings.imageLogo || 'https://placehold.co/180x50/F57C00/FFFFFF?text=Logo')}" alt="${escapeHtml(widget.title)}">`
+                        : '';
+                    return `<div class="blog-header-inner">${logo}<div class="blog-heading">
+                        <h1 class="blog-title">${escapeHtml(widget.title)}</h1>
+                        <p class="blog-description">${escapeHtml(widget.settings.description || '')}</p>
+                    </div></div>`;
+                }
+
+                if (widget.type === 'Blog') return this.renderBlogWidget(widget);
+
+                if (widget.type === 'PageList') {
+                    const pages = Array.isArray(widget.settings.pages) ? widget.settings.pages : [];
+                    let list = '';
+                    if (widget.settings.showHome) list += `<li><a href="#">Home</a></li>`;
+                    pages.filter((page) => page.toLowerCase() !== 'home').forEach((page) => {
+                        list += `<li><a href="#">${escapeHtml(page)}</a></li>`;
+                    });
+                    return `<ul class="page-list">${list}</ul>`;
+                }
+
+                if (widget.type === 'FeaturedPost') {
+                    const image = widget.settings.showThumbnail
+                        ? `<img class="featured-image" src="https://placehold.co/1200x420/F57C00/FFFFFF?text=Featured+Article" alt="Featured article">`
+                        : '';
+                    return `<div class="featured-post">${image}
+                        <h2><a href="#">The Future of AI-Driven Web Development &amp; Blogger Ecosystems</a></h2>
+                        <p>Explore how 1:1 synchronized schema rendering bridges the gap between local visual editing and native Google Blogspot XML publishing.</p>
+                    </div>`;
+                }
+
+                if (widget.type === 'BlogSearch') {
+                    return `<form action="#" class="blog-search-form" onsubmit="return false">
+                        <input name="q" placeholder="${escapeHtml(widget.settings.placeholder || 'Search...')}" type="text">
+                        <input value="Search" type="submit">
+                    </form>`;
+                }
+
+                if (widget.type === 'PopularPosts') {
+                    const total = Math.min(Math.max(parseInt(widget.settings.maxPosts, 10) || 3, 1), 10);
+                    let list = '';
+                    for (let p = 1; p <= total; p++) {
+                        const post = SAMPLE_POSTS[(p - 1) % SAMPLE_POSTS.length];
+                        const thumb = widget.settings.showThumbnail
+                            ? `<img class="popular-thumb" src="https://placehold.co/56x56/F57C00/FFFFFF?text=${p}" alt="${escapeHtml(post.title)}">`
+                            : '';
+                        list += `<div class="popular-post">${thumb}<a href="#">${escapeHtml(post.title)}</a></div>`;
+                    }
+                    return `<div class="popular-posts">${list}</div>`;
+                }
+
+                if (widget.type === 'Label') {
+                    const cloud = (widget.settings.displayMode || 'cloud') === 'cloud';
+                    if (cloud) {
+                        return `<div class="label-list">${SAMPLE_LABELS.map((label) => `<a class="label-link" href="#">${escapeHtml(label.name)}${widget.settings.showCount ? `<span class="label-count">${label.count}</span>` : ''}</a>`).join('')}</div>`;
+                    }
+                    return `<ul class="label-list">${SAMPLE_LABELS.map((label) => `<li><a class="label-link" href="#">${escapeHtml(label.name)}</a>${widget.settings.showCount ? `<span class="label-count">${label.count}</span>` : ''}</li>`).join('')}</ul>`;
+                }
+
+                if (widget.type === 'BlogArchive') {
+                    return `<ul class="archive-list">${SAMPLE_ARCHIVE_MONTHS.map((month) => `<li><a href="#">${escapeHtml(month.label)}</a> <span class="label-count">${month.count}</span></li>`).join('')}</ul>`;
+                }
+
+                if (widget.type === 'Profile') {
+                    return `<div class="profile-widget">
+                        <span class="profile-name">Admin Studio</span>
+                        <p>${escapeHtml(widget.settings.bio || '')}</p>
+                    </div>`;
+                }
+
+                if (widget.type === 'Image') {
+                    const src = escapeHtml(widget.settings.imageUrl || 'https://placehold.co/400x200/E2E8F0/64748B?text=Image');
+                    const image = `<img src="${src}" alt="${escapeHtml(widget.settings.altText || widget.title)}">`;
+                    return `<div class="image-widget">${widget.settings.imageLink ? `<a href="#">${image}</a>` : image}</div>`;
+                }
+
+                if (widget.type === 'HTML') {
+                    const content = String(widget.settings.content || '').trim();
+                    return `<div class="html-widget-body">${content || '<span class="standard-widget-body">No HTML content yet. Paste markup in the inspector.</span>'}</div>`;
+                }
+
+                if (widget.type === 'LinkList') {
+                    const links = Array.isArray(widget.settings.links) ? widget.settings.links : [];
+                    return links.length
+                        ? `<ul class="link-list">${links.map((link) => `<li><a href="#">${escapeHtml(link.name)}</a></li>`).join('')}</ul>`
+                        : `<p class="standard-widget-body">No links configured yet.</p>`;
+                }
+
+                if (widget.type === 'Attribution') {
+                    return `<div class="attribution">${escapeHtml(widget.settings.creditText || 'Powered by Blogger.')}</div>`;
+                }
+
+                if (widget.type === 'ContactForm') {
+                    return `<form action="#" class="contact-form-widget" onsubmit="return false">
+                        <input name="name" placeholder="Name" type="text">
+                        <input name="email" placeholder="Email" type="email">
+                        <textarea name="message" placeholder="Message" rows="3"></textarea>
+                        <input value="Send" type="submit">
+                    </form>`;
+                }
+
+                if (widget.type === 'ReportAbuse') {
+                    return `<a class="report-abuse" href="#">Report Abuse</a>`;
+                }
+
+                return `<div class="standard-widget-body">Widget content for ${escapeHtml(widget.type)}</div>`;
+            }
+
+            renderSectionPlaceholder(sec) {
+                return `<div class="section-empty" onclick="app.promptAddWidgetToSection('${sec.id}')">
+                    <i class="fa-solid fa-plus"></i> &#160;${escapeHtml(sec.name)} is empty — click to add a gadget.
+                </div>`;
+            }
+
+            renderBlogWidget(w) {
+                const pageType = this.schema.activePageType;
+                const readMore = escapeHtml(w.settings.readMoreText || 'Continue Reading →');
+                let html = `<div class="blog-posts">`;
+
+                if (pageType === 'index') {
+                    const total = Math.min(Math.max(parseInt(w.settings.postsPerPage, 10) || 4, 1), 20);
+                    for (let i = 1; i <= total; i++) {
+                        const post = SAMPLE_POSTS[(i - 1) % SAMPLE_POSTS.length];
+                        const meta = [];
+                        if (w.settings.showAuthor !== false) meta.push('By Admin Studio');
+                        if (w.settings.showTimestamp !== false) meta.push('October 24, 2026');
+                        html += `<article class="post-item">
+                            <img class="post-thumb" src="https://placehold.co/1200x360/F57C00/FFFFFF?text=Post+${i}" alt="${escapeHtml(post.title)}">
+                            <h2 class="post-title"><a href="#">${escapeHtml(post.title)} #${i}</a></h2>
+                            ${meta.length ? `<div class="post-meta">${meta.join(' &#183; ')}</div>` : ''}
+                            <div class="post-snippet">${escapeHtml(post.snippet)}</div>
+                            ${w.settings.showLabels ? `<div class="post-labels"><a class="label-link" href="#">Technology</a><a class="label-link" href="#">Blogger</a></div>` : ''}
+                            <a class="read-more" href="#">${readMore}</a>
+                        </article>`;
+                    }
+                    html += `<a class="blog-pager-older-link" href="#">Older Posts</a>`;
+                } else if (pageType === 'item') {
+                    html += `<article class="post-item post-item-single">
+                        <h1 class="post-title">Mastering Native Blogger Template Architecture</h1>
+                        <div class="post-meta">By Admin &#183; October 24, 2026 &#183; 5 Comments</div>
+                        <div class="post-body">
+                            <p>This is a simulated post detail view rendered from the canonical theme schema. When installed in Blogger, it matches the <code>main</code> includable post body rendering.</p>
+                            <p>Use the Properties Inspector to adjust the post stream, author metadata, labels, timestamps and read-more label. Every change is reflected here and in the compiled XML.</p>
+                        </div>
+                        <div class="post-labels"><a class="label-link" href="#">Technology</a><a class="label-link" href="#">Tutorials</a></div>
+                    </article>`;
+                } else if (pageType === 'archive') {
+                    html += `<article class="post-item post-item-single">
+                        <h1 class="post-title">Blog Archive</h1>
+                        <ul class="archive-list">${SAMPLE_ARCHIVE_MONTHS.map((month, index) => `<li>${index === 0 ? '&#9660; ' : '&#9654; '}<a href="#">${escapeHtml(month.label)}</a> <span class="label-count">${month.count} posts</span></li>`).join('')}</ul>
+                    </article>`;
+                } else {
+                    html += `<article class="post-item post-item-single">
+                        <h1 class="post-title">Static Page</h1>
+                        <div class="post-body"><p>Static pages reuse the same theme shell, header, navigation and sidebar. Switch the page type selector to compare layouts.</p></div>
+                    </article>`;
+                }
+
+                html += `</div>`;
+                return html;
+            }
+
+            renderLayoutCanvas() {
+                const { left: leftSidebarSections, right: rightSidebarSections } = this.getSidebarSections();
+                const hasMainSection = this.schema.sections.some((sec) => sec.type === 'main');
+                const hasSidebarSections = leftSidebarSections.length > 0 || rightSidebarSections.length > 0;
+                const widgetCount = this.schema.sections.reduce((total, sec) => total + sec.widgets.length, 0);
+                const c = this.schema.customizer.colors;
+                const t = this.schema.customizer.typography;
+                let columnsRendered = false;
+                let html = `
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style id="canvas-layout-styles">
+                        *, *::before, *::after { box-sizing: border-box; }
+                        .layout-frame { container-type: inline-size; min-height: 100%; background-color: #f1f3f4; }
+                        .layout-shell { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text-color); padding: 18px; --primary-color: ${c.primary}; --secondary-color: ${c.secondary}; --bg-color: ${c.background}; --surface-color: ${c.surface}; --text-color: ${c.text}; --muted-color: ${c.muted}; --border-color: ${c.border}; --link-color: ${c.links}; --post-width: ${t.postWidth}; --sidebar-left-width: ${t.sidebarLeftWidth}; --sidebar-right-width: ${t.sidebarRightWidth}; --sidebar-width: ${t.sidebarRightWidth}; --column-space: clamp(16px, 2.5vw, 32px); }
+                        .layout-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
+                        .layout-title { font-size: 15px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; }
+                        .layout-subtitle { margin: 4px 0 0; font-size: 11px; color: #5f6368; }
+                        .layout-pill { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #1967d2; background-color: #e8f0fe; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+                        .layout-sections { display: flex; flex-direction: column; gap: 14px; }
+                        .layout-row.content-container { display: grid; width: 100%; max-width: 100%; min-width: 0; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 28px 16px; align-items: start; }
+                        .layout-col-main.posts-col { width: 100%; max-width: 100%; min-width: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; order: 1; }
+                        .layout-col-side.sidebar-left-col, .layout-col-side.sidebar-right-col, .layout-col-side.sidebar-col { width: 100%; max-width: 100%; min-width: 0; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+                        .layout-col-side.sidebar-left-col { order: 2; }
+                        .layout-col-side.sidebar-right-col, .layout-col-side.sidebar-col { order: 3; }
+                        .layout-section.section-wrap { width: 100%; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+                        .layout-section.section-wrap.section-header { background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); padding: 20px 24px; }
+                        .layout-section.section-wrap.section-navigation { background-color: #202124; color: #ffffff; padding: 12px 24px; }
+                        .layout-section.section-wrap.section-footer { background-color: #202124; color: #9aa0a6; padding: 28px 24px; font-size: 13px; }
+                        .layout-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; background-color: transparent; }
+                        .layout-section-title { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+                        .layout-section-label { font-size: 12px; font-weight: 600; }
+                        .layout-badge { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; padding: 2px 7px; border-radius: 999px; background-color: #e8eaed; color: #5f6368; font-weight: 700; }
+                        .layout-count { font-size: 10px; color: #80868b; }
+                        .layout-section-actions { display: flex; align-items: center; gap: 6px; }
+                        .layout-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; border-radius: 6px; padding: 5px 10px; border: 1px solid #dadce0; background-color: #ffffff; color: #3c4043; cursor: pointer; font-family: inherit; }
+                        .layout-btn:hover { background-color: #f1f3f4; }
+                        .layout-btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: #ffffff; }
+                        .layout-btn-primary:hover { background-color: #1765cc; }
+                        .layout-btn-icon { padding: 5px 8px; color: #5f6368; }
+                        .layout-widget-list { display: flex; flex-direction: column; }
+                        .layout-widget { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; background-color: #ffffff; border-radius: 8px; margin: 6px 0; border: 1px solid var(--border-color); }
+                        .layout-widget:last-child { border-bottom: 0; margin-bottom: 0; }
+                        .layout-widget:hover { background-color: #f8fbff; border-color: var(--primary-color); }
+                        .layout-widget.is-selected { background-color: #fef7e0; border: 2px solid var(--primary-color); box-shadow: inset 3px 0 0 var(--primary-color); border-radius: 8px; }
+                        .layout-grip { color: #bdc1c6; font-size: 11px; cursor: grab; }
+                        .layout-widget-icon { color: #f57c00; font-size: 12px; width: 16px; text-align: center; }
+                        .layout-widget-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+                        .layout-widget-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                        .layout-widget-meta { font-size: 10px; color: #80868b; font-family: 'Fira Code', monospace; }
+                        .layout-widget-actions { display: flex; align-items: center; gap: 4px; opacity: .55; transition: opacity .15s ease; }
+                        .layout-widget:hover .layout-widget-actions, .layout-widget.is-selected .layout-widget-actions { opacity: 1; }
+                        .layout-mini { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #dadce0; background-color: #ffffff; border-radius: 5px; color: #5f6368; font-size: 10px; cursor: pointer; }
+                        .layout-mini:hover:not(:disabled) { background-color: #f1f3f4; color: #202124; }
+                        .layout-mini:disabled { opacity: .35; cursor: default; }
+                        .layout-mini-danger:hover:not(:disabled) { background-color: #fce8e6; border-color: #f6aea9; color: #c5221f; }
+                        .layout-empty { padding: 18px 14px; font-size: 11px; color: #80868b; text-align: center; }
+                        .layout-hint { margin-top: 14px; font-size: 10px; color: #5f6368; text-align: center; }
+                        @container (min-width: 601px) {
+                            .layout-row.content-container { grid-template-columns: ${this.buildContentColumns()}; }
+                            .layout-col-main.posts-col { padding: 0 var(--column-space); order: 0; }
+                            .layout-col-side.sidebar-left-col, .layout-col-side.sidebar-right-col, .layout-col-side.sidebar-col { order: 0; }
+                        }
+                    </style>
+                    <div class="layout-frame"><div class="layout-shell">
+                        <div class="layout-topbar">
+                            <div>
+                                <h1 class="layout-title"><i class="fa-solid fa-table-columns"></i> Layout</h1>
+                                <p class="layout-subtitle">${escapeHtml(this.schema.metadata.name)} &#183; ${this.schema.sections.length} sections &#183; ${widgetCount} gadgets</p>
+                            </div>
+                            <span class="layout-pill">Blogger Layout</span>
+                        </div>
+                        <div class="layout-sections">
+                `;
+
+                this.schema.sections.forEach((sec) => {
+                    if (this.isSidebarType(sec.type) && hasMainSection) return;
+
+                    if (sec.type === 'main' && hasSidebarSections && !columnsRendered) {
+                        columnsRendered = true;
+                        html += `<div class="layout-row content-container">`;
+                        if (leftSidebarSections.length) {
+                            html += `<div class="layout-col-side sidebar-left-col">`;
+                            leftSidebarSections.forEach((sidebarSec) => {
+                                html += this.renderLayoutSection(sidebarSec);
+                            });
+                            html += `</div>`;
+                        }
+                        html += `<div class="layout-col-main posts-col">${this.renderLayoutSection(sec)}</div>`;
+                        if (rightSidebarSections.length) {
+                            html += `<div class="layout-col-side sidebar-right-col">`;
+                            rightSidebarSections.forEach((sidebarSec) => {
+                                html += this.renderLayoutSection(sidebarSec);
+                            });
+                            html += `</div>`;
+                        }
+                        html += `</div>`;
+                        return;
+                    }
+
+                    html += this.renderLayoutSection(sec);
+                });
+
+                html += `
+                        </div>
+                        <p class="layout-hint">Click a gadget to edit it in the inspector. Use the arrows to reorder, or “Add a Gadget” to drop a new one into a section.</p>
+                    </div></div>
+                `;
+                return html;
+            }
+
+            renderLayoutSection(sec) {
+                const label = SECTION_TYPE_LABELS[sec.type] || sec.type;
+                const widgets = sec.widgets.length
+                    ? sec.widgets.map((widget, index) => this.renderLayoutWidget(sec, widget, index)).join('')
+                    : `<div class="layout-empty">No gadgets yet — use “Add a Gadget” to drop one in.</div>`;
+                return `<div class="layout-section section-wrap section-${sec.type}" data-section-id="${escapeHtml(sec.id)}">
+                    <div class="layout-section-head">
+                        <div class="layout-section-title">
+                            <span class="layout-section-label">${escapeHtml(sec.name)}</span>
+                            <span class="layout-badge">${escapeHtml(label)}</span>
+                            <span class="layout-count">${sec.widgets.length} gadget${sec.widgets.length === 1 ? '' : 's'}</span>
+                        </div>
+                        <div class="layout-section-actions">
+                            <button type="button" class="layout-btn layout-btn-primary" onclick="app.promptAddWidgetToSection('${sec.id}')"><i class="fa-solid fa-plus"></i> Add a Gadget</button>
+                            <button type="button" class="layout-btn layout-btn-icon" title="Delete section" onclick="app.removeSection('${sec.id}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="layout-widget-list">${widgets}</div>
+                </div>`;
+            }
+
+            renderLayoutWidget(sec, widget, index) {
+                const info = NATIVE_WIDGET_REGISTRY[widget.type];
+                const icon = info ? info.icon : 'fa-puzzle-piece';
+                const selected = widget.id === this.selectedId ? ' is-selected' : '';
+                const isFirst = index === 0;
+                const isLast = index === sec.widgets.length - 1;
+                return `<div class="layout-widget${selected}" data-widget-id="${widget.id}" onclick="app.selectWidget('${widget.id}')">
+                    <i class="fa-solid fa-grip-vertical layout-grip"></i>
+                    <i class="fa-solid ${icon} layout-widget-icon"></i>
+                    <div class="layout-widget-text">
+                        <span class="layout-widget-title">${escapeHtml(widget.title)}</span>
+                        <span class="layout-widget-meta">${escapeHtml(widget.type)} &#183; #${escapeHtml(widget.id)}</span>
+                    </div>
+                    <div class="layout-widget-actions">
+                        <button type="button" class="layout-mini" title="Move up" onclick="event.stopPropagation(); app.moveWidget('${sec.id}', ${index}, -1)" ${isFirst ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" class="layout-mini" title="Move down" onclick="event.stopPropagation(); app.moveWidget('${sec.id}', ${index}, 1)" ${isLast ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                        <button type="button" class="layout-mini layout-mini-danger" title="Delete gadget" onclick="event.stopPropagation(); app.removeWidget('${sec.id}', '${widget.id}')"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>`;
+            }
+
+            applySelectionHighlight() {
+                const root = document.getElementById('canvas-root');
+                if (!root) return;
+                const scope = root.shadowRoot || root;
+                scope.querySelectorAll('.widget-node, .layout-widget').forEach((el) => {
+                    el.classList.toggle('is-selected', el.dataset.widgetId === this.selectedId);
+                });
+            }
+
+            selectWidget(widgetId) {
+                const widget = this.findWidget(widgetId);
+                if (!widget) return;
+                this.selectedId = widget.id;
+                const section = this.findSectionOfWidget(widget.id);
+                this.selectedSectionId = section ? section.id : null;
+                this.applySelectionHighlight();
+                this.renderLeftPanel();
+                this.renderPropertiesInspector();
+            }
+
+            findWidget(widgetId) {
+                for (const section of this.schema.sections) {
+                    const found = section.widgets.find((w) => w.id === widgetId);
+                    if (found) return found;
+                }
+                return null;
+            }
+
+            findSectionOfWidget(widgetId) {
+                return this.schema.sections.find((section) => section.widgets.some((w) => w.id === widgetId)) || null;
+            }
+
+            createSettings(type) {
+                const info = NATIVE_WIDGET_REGISTRY[type] || NATIVE_WIDGET_REGISTRY.HTML;
+                return JSON.parse(JSON.stringify(info.defaults || {}));
+            }
+
+            createWidget(type, title) {
+                const info = NATIVE_WIDGET_REGISTRY[type] ? type : 'HTML';
+                const registry = NATIVE_WIDGET_REGISTRY[info];
+                let count = 1;
+                let id = `${registry.idPrefix}${count}`;
+                while (this.findWidget(id)) {
+                    count++;
+                    id = `${registry.idPrefix}${count}`;
+                }
+                return { id, type: info, title: title || registry.defaultTitle, settings: this.createSettings(info) };
+            }
+
+            addWidget(type) {
+                const registry = NATIVE_WIDGET_REGISTRY[type];
+                if (!registry) return;
+                const sectionHints = { Header: 'header', PageList: 'navigation', Blog: 'main', FeaturedPost: 'featured', LinkList: 'footer', Attribution: 'footer' };
+                const preferredType = sectionHints[type];
+                let section = preferredType ? this.schema.sections.find((sec) => sec.type === preferredType) : null;
+                if (!section) {
+                    const { right, left } = this.getSidebarSections();
+                    section = right[0] || left[0] || null;
+                }
+                if (!section) section = this.schema.sections.find((sec) => sec.type === 'main');
+                if (!section) section = this.schema.sections[0];
+                if (!section) {
+                    this.showToast('Create a section first from the Layout tab.', 'error');
+                    return;
+                }
+                const widget = this.createWidget(type);
+                section.widgets.push(widget);
+                this.selectedId = widget.id;
+                this.selectedSectionId = section.id;
+                this.saveState();
+                this.renderAll();
+                this.showToast(`${registry.defaultTitle} added to ${section.name}.`, 'success');
+            }
+
+            moveSection(index, delta) {
+                const target = index + delta;
+                if (target < 0 || target >= this.schema.sections.length) return;
+                const sections = this.schema.sections;
+                [sections[index], sections[target]] = [sections[target], sections[index]];
+                this.saveState();
+                this.renderAll();
+            }
+
+            moveWidget(sectionId, index, delta) {
+                const section = this.schema.sections.find((sec) => sec.id === sectionId);
+                if (!section) return;
+                const target = index + delta;
+                if (target < 0 || target >= section.widgets.length) return;
+                [section.widgets[index], section.widgets[target]] = [section.widgets[target], section.widgets[index]];
+                this.saveState();
+                this.renderAll();
+            }
+
+            removeWidget(sectionId, widgetId) {
+                const section = this.schema.sections.find((sec) => sec.id === sectionId);
+                const widget = section ? section.widgets.find((w) => w.id === widgetId) : null;
+                if (!section || !widget) return;
+                this.promptConfirm('Delete Gadget', `Remove <b>${escapeHtml(widget.title)}</b> from ${escapeHtml(section.name)}? You can restore it with Undo (Ctrl+Z).`, () => {
+                    section.widgets = section.widgets.filter((w) => w.id !== widgetId);
+                    if (this.selectedId === widgetId) {
+                        this.selectedId = null;
+                        this.selectedSectionId = null;
+                    }
+                    this.saveState();
+                    this.renderAll();
+                    this.showToast('Gadget deleted.', 'info');
+                });
+            }
+
+            removeSection(sectionId) {
+                const section = this.schema.sections.find((sec) => sec.id === sectionId);
+                if (!section) return;
+                if (this.schema.sections.length === 1) {
+                    this.showToast('A theme needs at least one section.', 'error');
+                    return;
+                }
+                this.promptConfirm('Delete Section', `Delete <b>${escapeHtml(section.name)}</b> and its ${section.widgets.length} gadget(s)?`, () => {
+                    this.schema.sections = this.schema.sections.filter((sec) => sec.id !== sectionId);
+                    if (this.selectedSectionId === sectionId) {
+                        this.selectedId = null;
+                        this.selectedSectionId = null;
+                    }
+                    this.saveState();
+                    this.renderAll();
+                    this.showToast('Section deleted.', 'info');
+                });
+            }
+
+            updateWidgetSetting(widgetId, key, rawValue, kind = 'string') {
+                const widget = this.findWidget(widgetId);
+                if (!widget) return;
+
+                let value = rawValue;
+                if (kind === 'number') {
+                    const limits = { postsPerPage: [1, 20], maxPosts: [1, 10], snippetLength: [20, 500] };
+                    const range = limits[key] || [1, 500];
+                    value = Math.min(range[1], Math.max(range[0], parseInt(rawValue, 10) || range[0]));
+                } else if (kind === 'boolean') {
+                    value = Boolean(rawValue);
+                }
+
+                if (key === '__title__') {
+                    const registry = NATIVE_WIDGET_REGISTRY[widget.type];
+                    widget.title = String(value).trim() || (registry ? registry.defaultTitle : widget.type);
+                } else if (key === '__pages_text__') {
+                    widget.settings.pages = String(value).split(/[\n,]/).map((page) => page.trim()).filter(Boolean);
+                } else if (key === '__links_text__') {
+                    widget.settings.links = String(value).split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
+                        const parts = line.split('|').map((part) => part.trim());
+                        return { name: parts[0] || '', url: parts[1] || '#' };
+                    }).filter((link) => link.name);
+                } else {
+                    widget.settings[key] = value;
+                }
+
+                this.saveState();
+                this.renderCanvas();
+                this.renderLeftPanel();
+                if (key === '__title__') this.renderPropertiesInspector();
+            }
+
+            updateColor(key, value) {
+                if (!/^#[0-9a-f]{6}$/i.test(value || '')) return;
+                this.schema.customizer.colors[key] = value;
+                this.saveState();
+                this.renderCanvas();
+                this.renderLeftPanel();
+            }
+
+            updateTypography(key, value) {
+                const cleaned = String(value || '').trim();
+                const isLength = /^\d+(\.\d+)?(px|rem|em|%|vw)$/.test(cleaned);
+                if (key !== 'fontFamily' && !isLength) {
+                    this.showToast('Use a valid CSS length such as 1200px, 72rem or 100%.', 'error');
+                    this.renderLeftPanel();
+                    return;
+                }
+                if (!cleaned) return;
+                this.schema.customizer.typography[key] = cleaned;
+                this.saveState();
+                this.renderCanvas();
+                this.renderLeftPanel();
+            }
+
+            resetCustomizer() {
+                this.schema.customizer = JSON.parse(JSON.stringify(DEFAULT_CUSTOMIZER));
+                this.saveState();
+                this.renderCanvas();
+                this.renderLeftPanel();
+                this.showToast('Palette and typography reset to defaults.', 'info');
+            }
+
+            renderPropertiesInspector() {
+                const container = document.getElementById('right-panel-content');
+                const badge = document.getElementById('selected-item-badge');
+                if (!container) return;
+
+                const widget = this.selectedId ? this.findWidget(this.selectedId) : null;
+                if (!widget) {
+                    if (badge) badge.textContent = 'No selection';
+                    container.innerHTML = `<div class="text-center py-12 text-slate-500 text-xs">
+                        <i class="fa-solid fa-hand-pointer text-2xl mb-2 text-slate-600"></i>
+                        <p>Select any gadget in the canvas or the Layout tab to configure its properties.</p>
+                    </div>`;
+                    return;
+                }
+
+                const registry = NATIVE_WIDGET_REGISTRY[widget.type];
+                const section = this.findSectionOfWidget(widget.id);
+                if (badge) badge.textContent = widget.type;
+
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 space-y-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded bg-blogger-orange/15 text-blogger-orange flex items-center justify-center">
+                                    <i class="fa-solid ${registry ? registry.icon : 'fa-puzzle-piece'}"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-slate-100 truncate">${escapeHtml(widget.title)}</div>
+                                    <div class="text-[10px] text-slate-400 font-mono truncate">${escapeHtml(widget.id)} &#183; ${escapeHtml(widget.type)}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Widget Title</label>
+                                <input type="text" value="${escapeHtml(widget.title)}" onchange="app.updateWidgetSetting('${widget.id}', '__title__', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 focus:border-blogger-orange focus:outline-none">
+                            </div>
+                            <div class="text-[10px] text-slate-400">
+                                Section: <span class="text-slate-300">${escapeHtml(section ? section.name : 'Unassigned')}</span>
+                                <span class="font-mono">(${escapeHtml(section ? section.id : '-')})</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 space-y-3">
+                            <div class="text-xs font-bold text-slate-200">${escapeHtml(widget.type)} Settings</div>
+                            ${this.renderWidgetSettings(widget)}
+                        </div>
+                        <button onclick="app.removeWidget('${section ? section.id : ''}', '${widget.id}')" class="w-full bg-red-600/80 hover:bg-red-600 text-white py-2 rounded text-xs font-semibold transition">
+                            <i class="fa-solid fa-trash mr-1"></i> Delete Gadget
+                        </button>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Changes are applied instantly to the canvas and the compiled Blogger XML.</p>
+                    </div>
+                `;
+            }
+
+            settingInput(widget, key, label, placeholder = '') {
+                return `<div>
+                    <label class="text-[10px] text-slate-400 block mb-1">${escapeHtml(label)}</label>
+                    <input type="text" value="${escapeHtml(widget.settings[key] ?? '')}" placeholder="${escapeHtml(placeholder)}" onchange="app.updateWidgetSetting('${widget.id}', '${key}', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 focus:border-blogger-orange focus:outline-none">
+                </div>`;
+            }
+
+            settingNumber(widget, key, label, min, max) {
+                return `<div>
+                    <label class="text-[10px] text-slate-400 block mb-1">${escapeHtml(label)}</label>
+                    <input type="number" min="${min}" max="${max}" value="${escapeHtml(widget.settings[key] ?? min)}" onchange="app.updateWidgetSetting('${widget.id}', '${key}', this.value, 'number')" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 focus:border-blogger-orange focus:outline-none">
+                </div>`;
+            }
+
+            settingTextarea(widget, key, label, placeholder = '', rows = 3) {
+                return `<div>
+                    <label class="text-[10px] text-slate-400 block mb-1">${escapeHtml(label)}</label>
+                    <textarea rows="${rows}" placeholder="${escapeHtml(placeholder)}" onchange="app.updateWidgetSetting('${widget.id}', '${key}', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 code-font focus:border-blogger-orange focus:outline-none">${escapeHtml(widget.settings[key] ?? '')}</textarea>
+                </div>`;
+            }
+
+            settingCheckbox(widget, key, label) {
+                return `<label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                    <input type="checkbox" ${widget.settings[key] ? 'checked' : ''} onchange="app.updateWidgetSetting('${widget.id}', '${key}', this.checked, 'boolean')" class="accent-orange-500 w-3.5 h-3.5">
+                    <span>${escapeHtml(label)}</span>
+                </label>`;
+            }
+
+            settingSelect(widget, key, label, options) {
+                const current = widget.settings[key];
+                const optionHtml = options.map((option) => `<option value="${escapeHtml(option.value)}" ${current === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('');
+                return `<div>
+                    <label class="text-[10px] text-slate-400 block mb-1">${escapeHtml(label)}</label>
+                    <select onchange="app.updateWidgetSetting('${widget.id}', '${key}', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 focus:border-blogger-orange focus:outline-none">${optionHtml}</select>
+                </div>`;
+            }
+
+            renderWidgetSettings(widget) {
+                switch (widget.type) {
+                    case 'Header':
+                        return [
+                            this.settingInput(widget, 'description', 'Blog Description', 'Short tagline'),
+                            this.settingCheckbox(widget, 'showImage', 'Show logo image'),
+                            this.settingInput(widget, 'imageLogo', 'Logo URL', 'https://...')
+                        ].join('');
+                    case 'Blog':
+                        return [
+                            this.settingNumber(widget, 'postsPerPage', 'Posts per page', 1, 20),
+                            this.settingInput(widget, 'readMoreText', 'Read More Label', 'Continue Reading →'),
+                            this.settingCheckbox(widget, 'showAuthor', 'Show author'),
+                            this.settingCheckbox(widget, 'showTimestamp', 'Show timestamp'),
+                            this.settingCheckbox(widget, 'showLabels', 'Show labels')
+                        ].join('');
+                    case 'PageList':
+                        return [
+                            this.settingCheckbox(widget, 'showHome', 'Include Home link'),
+                            `<div>
+                                <label class="text-[10px] text-slate-400 block mb-1">Pages (one per line or comma separated)</label>
+                                <textarea rows="4" onchange="app.updateWidgetSetting('${widget.id}', '__pages_text__', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 focus:border-blogger-orange focus:outline-none">${escapeHtml((widget.settings.pages || []).join('\n'))}</textarea>
+                            </div>`
+                        ].join('');
+                    case 'BlogSearch':
+                        return this.settingInput(widget, 'placeholder', 'Placeholder Text', 'Search articles...');
+                    case 'PopularPosts':
+                        return [
+                            this.settingNumber(widget, 'maxPosts', 'Maximum posts', 1, 10),
+                            this.settingCheckbox(widget, 'showThumbnail', 'Show thumbnails'),
+                            this.settingCheckbox(widget, 'showSnippet', 'Show snippet')
+                        ].join('');
+                    case 'Label':
+                        return [
+                            this.settingSelect(widget, 'displayMode', 'Display mode', [
+                                { value: 'cloud', label: 'Label cloud' },
+                                { value: 'list', label: 'Vertical list' }
+                            ]),
+                            this.settingCheckbox(widget, 'showCount', 'Show post counts')
+                        ].join('');
+                    case 'BlogArchive':
+                        return this.settingSelect(widget, 'hierarchy', 'Hierarchy', [
+                            { value: 'tree', label: 'Tree (collapsible)' },
+                            { value: 'flat', label: 'Flat list' }
+                        ]);
+                    case 'Profile':
+                        return this.settingTextarea(widget, 'bio', 'Bio', 'Short author bio', 4);
+                    case 'HTML':
+                        return this.settingTextarea(widget, 'content', 'HTML / JavaScript', '<div>Hello</div>', 6) + `<p class="text-[10px] text-slate-500 m-0">Preview renders as text for safety. Raw markup is written into the exported XML; bare ampersands are escaped automatically.</p>`;
+                    case 'Image':
+                        return [
+                            this.settingInput(widget, 'imageUrl', 'Image URL', 'https://...'),
+                            this.settingInput(widget, 'imageLink', 'Link URL', 'https://...'),
+                            this.settingInput(widget, 'altText', 'Alt text', 'Descriptive text')
+                        ].join('');
+                    case 'LinkList':
+                        return `<div>
+                            <label class="text-[10px] text-slate-400 block mb-1">Links (one per line: Name | URL)</label>
+                            <textarea rows="4" placeholder="Privacy Policy | #" onchange="app.updateWidgetSetting('${widget.id}', '__links_text__', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200 code-font focus:border-blogger-orange focus:outline-none">${escapeHtml((widget.settings.links || []).map((link) => `${link.name} | ${link.url}`).join('\n'))}</textarea>
+                        </div>`;
+                    case 'Attribution':
+                        return this.settingInput(widget, 'creditText', 'Credit Text', 'Powered by Blogger.');
+                    case 'FeaturedPost':
+                        return [
+                            this.settingNumber(widget, 'snippetLength', 'Snippet length', 20, 500),
+                            this.settingCheckbox(widget, 'showThumbnail', 'Show thumbnail')
+                        ].join('');
+                    case 'ContactForm':
+                        return `<p class="text-[11px] text-slate-400 m-0">This gadget uses the native Blogger contact form. No visual settings are required.</p>`;
+                    case 'ReportAbuse':
+                        return `<p class="text-[11px] text-slate-400 m-0">This gadget renders the standard Blogger report abuse link.</p>`;
+                    default:
+                        return `<p class="text-[11px] text-slate-400 m-0">No dedicated settings for this gadget type.</p>`;
+                }
+            }
+
+            prepareHtmlForXml(html) {
+                return String(html).replace(/&(?!(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);)/g, '&amp;');
+            }
+
+            getBloggerSectionClassName(type) {
+                const classes = {
+                    header: 'section header section-header',
+                    navigation: 'section navbar section-navigation',
+                    featured: 'section crosscol section-featured',
+                    main: 'section main section-main',
+                    'sidebar-left': 'section sidebar section-sidebar-left',
+                    'sidebar-right': 'section sidebar section-sidebar-right',
+                    sidebar: 'section sidebar section-sidebar',
+                    footer: 'section footer section-footer'
+                };
+                return classes[type] || `section section-${type}`;
+            }
+
+            compileSectionXML(sec, indent = '        ') {
+                const inner = `${indent}        `;
+                const sectionClass = this.getBloggerSectionClassName(sec.type);
+                const growth = sec.type === 'navigation' || sec.type === 'footer' ? 'horizontal' : 'vertical';
+                const preferred = this.isSidebarType(sec.type) || sec.type === 'footer' ? " preferred='yes'" : '';
+                let xml = `${indent}<div class='section-wrap section-${sec.type}'>\n`;
+                xml += `${indent}    <b:section class='${sectionClass}' growth='${growth}' id='${escapeHtml(sec.id)}' name='${escapeHtml(sec.name)}'${preferred} showaddelement='yes'>\n`;
+                sec.widgets.forEach((widget) => {
+                    xml += this.compileWidgetXML(widget, inner);
+                });
+                xml += `${indent}    </b:section>\n`;
+                xml += `${indent}</div>\n`;
+                return xml;
+            }
+
+            compileWidgetXML(widget, indent = '            ') {
+                const registry = NATIVE_WIDGET_REGISTRY[widget.type] || NATIVE_WIDGET_REGISTRY.HTML;
+                const pad = `${indent}    `;
+                const deep = `${pad}    `;
+                let body = '';
+
+                if (widget.type === 'Header') {
+                    body += `${deep}<div class='blog-header-inner'>\n`;
+                    if (widget.settings.showImage && widget.settings.imageLogo) {
+                        body += `${deep}    <img alt='${escapeHtml(widget.title)}' class='blog-logo' src='${escapeHtml(widget.settings.imageLogo)}'/>\n`;
+                    }
+                    body += `${deep}    <div class='blog-heading'>\n`;
+                    body += `${deep}        <b:if cond='data:blog.url == data:blog.homepageUrl'>\n`;
+                    body += `${deep}            <h1 class='blog-title'><data:blog.title/></h1>\n`;
+                    body += `${deep}        <b:else/>\n`;
+                    body += `${deep}            <a class='blog-title' expr:href='data:blog.homepageUrl'><data:blog.title/></a>\n`;
+                    body += `${deep}        </b:if>\n`;
+                    body += `${deep}        <p class='blog-description'><data:description/></p>\n`;
+                    body += `${deep}    </div>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'Blog') {
+                    const metaParts = [];
+                    if (widget.settings.showTimestamp !== false) metaParts.push('<data:post.timestamp/>');
+                    if (widget.settings.showAuthor !== false) metaParts.push('<data:post.author/>');
+                    const metaXml = metaParts.join(' &#183; ');
+                    body += `${deep}<div class='blog-posts'>\n`;
+                    body += `${deep}    <b:loop values='data:posts' var='post'>\n`;
+                    body += `${deep}        <article class='post-item'>\n`;
+                    body += `${deep}            <b:if cond='data:post.thumbnailUrl'>\n`;
+                    body += `${deep}                <img class='post-thumb' expr:alt='data:post.title' expr:src='data:post.thumbnailUrl'/>\n`;
+                    body += `${deep}            </b:if>\n`;
+                    body += `${deep}            <h2 class='post-title'><a expr:href='data:post.url'><data:post.title/></a></h2>\n`;
+                    if (metaXml) body += `${deep}            <div class='post-meta'>${metaXml}</div>\n`;
+                    body += `${deep}            <div class='post-snippet'><data:post.snippet/></div>\n`;
+                    if (widget.settings.showLabels !== false) {
+                        body += `${deep}            <div class='post-labels'>\n`;
+                        body += `${deep}                <b:loop values='data:post.labels' var='label'>\n`;
+                        body += `${deep}                    <a class='label-link' expr:href='data:label.url'><data:label.name/></a>\n`;
+                        body += `${deep}                </b:loop>\n`;
+                        body += `${deep}            </div>\n`;
+                    }
+                    body += `${deep}            <a class='read-more' expr:href='data:post.url'>${escapeHtml(widget.settings.readMoreText || 'Read More')}</a>\n`;
+                    body += `${deep}        </article>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}    <b:if cond='data:olderPageUrl'>\n`;
+                    body += `${deep}        <a class='blog-pager-older-link' expr:href='data:olderPageUrl'>Older Posts</a>\n`;
+                    body += `${deep}    </b:if>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'PageList') {
+                    body += `${deep}<ul class='page-list'>\n`;
+                    body += `${deep}    <b:loop values='data:links' var='link'>\n`;
+                    body += `${deep}        <li><a expr:href='data:link.href'><data:link.title/></a></li>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</ul>\n`;
+                } else if (widget.type === 'BlogSearch') {
+                    body += `${deep}<form action='/search' class='blog-search-form' method='get'>\n`;
+                    body += `${deep}    <input name='q' placeholder='${escapeHtml(widget.settings.placeholder || 'Search...')}' type='text'/>\n`;
+                    body += `${deep}    <input value='Search' type='submit'/>\n`;
+                    body += `${deep}</form>\n`;
+                } else if (widget.type === 'PopularPosts') {
+                    body += `${deep}<div class='popular-posts'>\n`;
+                    body += `${deep}    <b:loop values='data:posts' var='post'>\n`;
+                    body += `${deep}        <div class='popular-post'>\n`;
+                    if (widget.settings.showThumbnail !== false) {
+                        body += `${deep}            <b:if cond='data:post.thumbnailUrl'>\n`;
+                        body += `${deep}                <img class='popular-thumb' expr:alt='data:post.title' expr:src='data:post.thumbnailUrl'/>\n`;
+                        body += `${deep}            </b:if>\n`;
+                    }
+                    body += `${deep}            <a expr:href='data:post.url'><data:post.title/></a>\n`;
+                    body += `${deep}        </div>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'Label') {
+                    body += `${deep}<div class='label-list'>\n`;
+                    body += `${deep}    <b:loop values='data:labels' var='label'>\n`;
+                    body += `${deep}        <a class='label-link' expr:href='data:label.url'><data:label.name/></a>\n`;
+                    body += `${deep}        <b:if cond='data:label.count'><span class='label-count'><data:label.count/></span></b:if>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'BlogArchive') {
+                    body += `${deep}<ul class='archive-list'>\n`;
+                    body += `${deep}    <b:loop values='data:data' var='i'>\n`;
+                    body += `${deep}        <li><a expr:href='data:i.url'><data:i.name/></a></li>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</ul>\n`;
+                } else if (widget.type === 'Profile') {
+                    body += `${deep}<div class='profile-widget'>\n`;
+                    body += `${deep}    <span class='profile-name'><data:displayname/></span>\n`;
+                    body += `${deep}    <b:if cond='data:aboutme'><p><data:aboutme/></p></b:if>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'FeaturedPost') {
+                    body += `${deep}<div class='featured-post'>\n`;
+                    body += `${deep}    <b:loop values='data:posts' var='post'>\n`;
+                    if (widget.settings.showThumbnail !== false) {
+                        body += `${deep}        <b:if cond='data:post.thumbnailUrl'>\n`;
+                        body += `${deep}            <img class='featured-image' expr:alt='data:post.title' expr:src='data:post.thumbnailUrl'/>\n`;
+                        body += `${deep}        </b:if>\n`;
+                    }
+                    body += `${deep}        <h2><a expr:href='data:post.url'><data:post.title/></a></h2>\n`;
+                    body += `${deep}        <p><data:post.snippet/></p>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</div>\n`;
+                } else if (widget.type === 'HTML') {
+                    body += `${deep}<div class='html-widget-body'>${this.prepareHtmlForXml(widget.settings.content || '')}</div>\n`;
+                } else if (widget.type === 'Image') {
+                    const src = escapeHtml(widget.settings.imageUrl || 'https://placehold.co/400x200/E2E8F0/64748B?text=Image');
+                    body += `${deep}<div class='image-widget'><img alt='${escapeHtml(widget.settings.altText || widget.title)}' src='${src}'/></div>\n`;
+                } else if (widget.type === 'LinkList') {
+                    body += `${deep}<ul class='link-list'>\n`;
+                    body += `${deep}    <b:loop values='data:links' var='link'>\n`;
+                    body += `${deep}        <li><a expr:href='data:link.target'><data:link.name/></a></li>\n`;
+                    body += `${deep}    </b:loop>\n`;
+                    body += `${deep}</ul>\n`;
+                } else if (widget.type === 'Attribution') {
+                    body += `${deep}<div class='attribution'><data:blog.title/> &#183; ${escapeHtml(widget.settings.creditText || 'Powered by Blogger.')}</div>\n`;
+                } else if (widget.type === 'ContactForm') {
+                    body += `${deep}<div class='contact-form-widget'><p>Contact form provided by Blogger.</p></div>\n`;
+                } else if (widget.type === 'ReportAbuse') {
+                    body += `${deep}<a class='report-abuse' expr:href='data:blog.homepageUrl'>Report Abuse</a>\n`;
+                } else {
+                    body += `${deep}<div class='standard-widget-body'>Widget content for ${escapeHtml(widget.type)}</div>\n`;
+                }
+
+                let xml = `${indent}<b:widget id='${widget.id}' locked='false' title='${escapeHtml(widget.title)}' type='${widget.type}' version='${registry.version}'>\n`;
+                xml += `${pad}<b:includable id='main'>\n`;
+                xml += `${deep}<div class='widget-content widget-${widget.type.toLowerCase()}'>\n`;
+                if (WIDGETS_WITHOUT_TITLE.indexOf(widget.type) === -1) {
+                    xml += `${deep}    <h2><data:title/></h2>\n`;
+                }
+                xml += body;
+                xml += `${deep}</div>\n`;
+                xml += `${pad}</b:includable>\n`;
+                xml += `${indent}</b:widget>\n`;
+                return xml;
+            }
+
+            compileBloggerXML() {
+                const { left: leftSidebarSections, right: rightSidebarSections } = this.getSidebarSections();
+                const hasMainSection = this.schema.sections.some((sec) => sec.type === 'main');
+                const hasSidebarSections = leftSidebarSections.length > 0 || rightSidebarSections.length > 0;
+                let columnsRendered = false;
+
+                let xml = `<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:js='true' b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta charset='utf-8'/>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    <b:skin><![CDATA[
+${this.buildThemeCSS('body', '@media (max-width: 600px)')}
+    ]]></b:skin>
+    <b:template-skin><![CDATA[
+${this.buildLayoutGuardCSS()}
+    ]]></b:template-skin>
+${CLOSE_HEAD_TAG}
+${OPEN_BODY_TAG}
+    <div class='main-wrapper'>
+`;
+
+                this.schema.sections.forEach((sec) => {
+                    if (this.isSidebarType(sec.type) && hasMainSection) return;
+                    if (sec.type === 'footer') return;
+
+                    if (sec.type === 'main' && hasSidebarSections && !columnsRendered) {
+                        columnsRendered = true;
+                        xml += `        <div class='content-container'>\n`;
+                        if (leftSidebarSections.length) {
+                            xml += `            <div class='sidebar-left-col'>\n`;
+                            leftSidebarSections.forEach((sidebarSec) => {
+                                xml += this.compileSectionXML(sidebarSec, '                ');
+                            });
+                            xml += `            </div>\n`;
+                        }
+                        xml += `            <div class='posts-col'>\n`;
+                        xml += this.compileSectionXML(sec, '                ');
+                        xml += `            </div>\n`;
+                        if (rightSidebarSections.length) {
+                            xml += `            <div class='sidebar-right-col'>\n`;
+                            rightSidebarSections.forEach((sidebarSec) => {
+                                xml += this.compileSectionXML(sidebarSec, '                ');
+                            });
+                            xml += `            </div>\n`;
+                        }
+                        xml += `        </div>\n`;
+                        return;
+                    }
+
+                    xml += this.compileSectionXML(sec);
+                });
+
+                xml += `    </div>\n`;
+
+                const footerSections = this.schema.sections.filter((sec) => sec.type === 'footer');
+                if (footerSections.length) {
+                    xml += `    <div class='footer-wrapper'>\n`;
+                    footerSections.forEach((sec) => {
+                        xml += this.compileSectionXML(sec, '    ');
+                    });
+                    xml += `    </div>\n`;
+                }
+
+                xml += `${CLOSE_BODY_TAG}\n${CLOSE_HTML_TAG}`;
+
+                const preview = document.getElementById('xml-quick-preview');
+                if (preview) preview.textContent = xml;
+                const meta = document.getElementById('xml-meta');
+                if (meta) {
+                    const widgetCount = this.schema.sections.reduce((total, sec) => total + sec.widgets.length, 0);
+                    meta.textContent = `${this.schema.sections.length} sections · ${widgetCount} widgets · ${xml.split('\n').length} lines`;
+                }
+                return xml;
+            }
+
+            validateTheme() {
+                try {
+                    const xml = this.compileBloggerXML();
+                    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+                    const parserError = doc.getElementsByTagName('parsererror')[0];
+                    if (parserError) {
+                        this.showModal('XML Validation Error', `<p class="text-red-400 font-mono text-xs mb-3 break-words">${escapeHtml(parserError.textContent)}</p>`, 'error');
+                        return false;
+                    }
+
+                    const elements = Array.from(doc.getElementsByTagName('*'));
+                    const skins = elements.filter((el) => el.localName === 'skin');
+                    const sections = elements.filter((el) => el.localName === 'section');
+                    const widgets = elements.filter((el) => el.localName === 'widget');
+                    const widgetIds = widgets.map((el) => el.getAttribute('id'));
+                    const duplicateIds = [...new Set(widgetIds.filter((id, index) => widgetIds.indexOf(id) !== index))];
+                    const issues = [];
+
+                    if (skins.length !== 1) issues.push(`Expected exactly one &lt;b:skin&gt; declaration but found ${skins.length}.`);
+                    if (!sections.length) issues.push('No &lt;b:section&gt; elements were generated.');
+                    if (duplicateIds.length) issues.push(`Duplicate widget IDs: ${escapeHtml(duplicateIds.join(', '))}.`);
+                    const emptySections = sections.filter((sec) => !Array.from(sec.children).some((child) => child.localName === 'widget'));
+
+                    if (issues.length) {
+                        this.showModal('Validation Failed', `<ul class="text-xs space-y-2 text-amber-300 list-disc pl-4">${issues.map((issue) => `<li>${issue}</li>`).join('')}</ul>`, 'error');
+                        return false;
+                    }
+
+                    this.showModal('Validation Successful', `<div class="text-emerald-400 space-y-2 text-xs">
+                        <p><i class="fa-solid fa-check-circle mr-1"></i> XML syntax is well-formed.</p>
+                        <p><i class="fa-solid fa-check-circle mr-1"></i> Exactly one <code>&lt;b:skin&gt;</code> declaration found.</p>
+                        <p><i class="fa-solid fa-check-circle mr-1"></i> ${sections.length} sections and ${widgets.length} widgets match the canonical Blogger architecture.</p>
+                        <p><i class="fa-solid fa-check-circle mr-1"></i> All widget IDs are unique.</p>
+                        ${emptySections.length ? `<p class="text-slate-400 pt-2 border-t border-slate-700"><i class="fa-solid fa-circle-info mr-1"></i> ${emptySections.length} empty section(s) will show the "Add a Gadget" link in Blogger.</p>` : ''}
+                    </div>`, 'success');
+                    return true;
+                } catch (error) {
+                    this.showModal('Validation Exception', `<p class="text-red-400 text-xs">${escapeHtml(error.message)}</p>`, 'error');
+                    return false;
+                }
+            }
+
+            async copyXML() {
+                const xml = this.compileBloggerXML();
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(xml);
+                    } else {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = xml;
+                        textArea.style.position = 'fixed';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    }
+                    this.showToast('XML copied to clipboard.', 'success');
+                } catch (error) {
+                    this.showToast('Failed to copy XML. Use Export XML instead.', 'error');
+                }
+            }
+
+            downloadXML() {
+                const xml = this.compileBloggerXML();
+                const blob = new Blob([xml], { type: 'text/xml' });
+                const url = URL.createObjectURL(blob);
+                const anchor = document.createElement('a');
+                const slug = this.schema.metadata.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'blogger-theme';
+                anchor.href = url;
+                anchor.download = `${slug}.xml`;
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+                URL.revokeObjectURL(url);
+                this.showToast('Blogger XML template downloaded.', 'success');
+            }
+
+            promptImportXML() {
+                this.showModal('Import Blogger XML Template', `
+                    <p class="text-xs text-slate-400 mb-3">Upload or paste an existing Blogger XML theme. Sections and widgets are rebuilt from the template, and CSS variables are reused when present.</p>
+                    <input type="file" accept=".xml,text/xml,application/xml" onchange="app.handleImportFile(event)" class="w-full mb-3 text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-200 hover:file:bg-slate-600">
+                    <textarea id="import-xml-textarea" class="w-full h-48 bg-slate-900 border border-slate-700 rounded p-2 text-xs code-font text-slate-200 mb-3" placeholder="Paste Blogger XML here..."></textarea>
+                    <button onclick="app.executeImport()" class="w-full bg-blogger-orange hover:bg-blogger-darkorange text-white py-2 rounded text-xs font-semibold transition">Parse &amp; Import Template</button>
+                `, 'normal');
+            }
+
+            handleImportFile(event) {
+                const file = event.target.files && event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const textarea = document.getElementById('import-xml-textarea');
+                    if (textarea) {
+                        textarea.value = String(reader.result || '');
+                        this.showToast(`${file.name} loaded. Click Parse & Import.`, 'info');
+                    }
+                };
+                reader.onerror = () => this.showToast('Failed to read the selected file.', 'error');
+                reader.readAsText(file);
+            }
+
+            sanitizeId(value, fallback) {
+                const cleaned = String(value || '')
+                    .replace(/[^A-Za-z0-9_-]/g, '_')
+                    .replace(/^[^A-Za-z]+/, '');
+                return cleaned || fallback;
+            }
+
+            formatSectionName(type) {
+                return SECTION_TYPE_LABELS[type] || 'Custom Section';
+            }
+
+            detectSectionType(sectionEl, index) {
+                const classAttr = sectionEl.getAttribute('class') || '';
+                const classMatch = classAttr.match(/section-([a-z0-9_-]+)/i);
+                if (classMatch) {
+                    const type = classMatch[1].toLowerCase();
+                    if (SECTION_TYPE_LABELS[type]) return type;
+                }
+                const id = (sectionEl.getAttribute('id') || '').toLowerCase();
+                if (id.includes('header')) return 'header';
+                if (id.includes('nav')) return 'navigation';
+                if (id.includes('featured')) return 'featured';
+                if (id.includes('sidebar') || id.includes('side')) {
+                    if (id.includes('left')) return 'sidebar-left';
+                    if (id.includes('right')) return 'sidebar-right';
+                    return 'sidebar';
+                }
+                if (id.includes('footer')) return 'footer';
+                return index === 0 ? 'header' : 'main';
+            }
+
+            executeImport() {
+                const textarea = document.getElementById('import-xml-textarea');
+                const source = textarea ? textarea.value.trim() : '';
+                if (!source) {
+                    this.showToast('Paste or upload a Blogger XML template first.', 'error');
+                    return;
+                }
+
+                const doc = new DOMParser().parseFromString(source, 'application/xml');
+                if (doc.getElementsByTagName('parsererror').length > 0) {
+                    this.showToast('Invalid XML. Fix the syntax errors before importing.', 'error');
+                    return;
+                }
+
+                const elements = Array.from(doc.getElementsByTagName('*'));
+                const sectionEls = elements.filter((el) => el.localName === 'section');
+                if (!sectionEls.length) {
+                    this.showToast('No section elements found in this template.', 'error');
+                    return;
+                }
+
+                const usedSectionIds = new Set();
+                const usedWidgetIds = new Set();
+                let widgetCount = 0;
+
+                const sections = sectionEls.map((sectionEl, index) => {
+                    const type = this.detectSectionType(sectionEl, index);
+                    const baseId = this.sanitizeId(sectionEl.getAttribute('id'), `imported-section-${index + 1}`);
+                    let sectionId = baseId;
+                    let suffix = 1;
+                    while (usedSectionIds.has(sectionId)) {
+                        suffix++;
+                        sectionId = `${baseId}-${suffix}`;
+                    }
+                    usedSectionIds.add(sectionId);
+
+                    const widgetEls = Array.from(sectionEl.children).filter((el) => el.localName === 'widget');
+                    const widgets = widgetEls.map((widgetEl, widgetIndex) => {
+                        const rawType = widgetEl.getAttribute('type') || 'HTML';
+                        const type2 = NATIVE_WIDGET_REGISTRY[rawType] ? rawType : 'HTML';
+                        const registry = NATIVE_WIDGET_REGISTRY[type2];
+                        const baseWidgetId = this.sanitizeId(widgetEl.getAttribute('id'), `${registry.idPrefix}${widgetIndex + 1}`);
+                        let widgetId = baseWidgetId;
+                        let widgetSuffix = 1;
+                        while (usedWidgetIds.has(widgetId)) {
+                            widgetSuffix++;
+                            widgetId = `${baseWidgetId}${widgetSuffix}`;
+                        }
+                        usedWidgetIds.add(widgetId);
+                        widgetCount++;
+                        return {
+                            id: widgetId,
+                            type: type2,
+                            title: widgetEl.getAttribute('title') || registry.defaultTitle,
+                            settings: this.createSettings(type2)
+                        };
+                    });
+
+                    return { id: sectionId, name: this.formatSectionName(type), type, widgets };
+                });
+
+                const skinEl = elements.find((el) => el.localName === 'skin');
+                const skinCss = skinEl ? skinEl.textContent : '';
+                if (skinCss) {
+                    const cssVar = (name, fallback) => {
+                        const match = skinCss.match(new RegExp(`--${name}\\s*:\\s*([^;]+);`));
+                        return match ? match[1].trim() : fallback;
+                    };
+                    const colors = this.schema.customizer.colors;
+                    colors.primary = cssVar('primary-color', colors.primary);
+                    colors.secondary = cssVar('secondary-color', colors.secondary);
+                    colors.background = cssVar('bg-color', colors.background);
+                    colors.surface = cssVar('surface-color', colors.surface);
+                    colors.text = cssVar('text-color', colors.text);
+                    colors.muted = cssVar('muted-color', colors.muted);
+                    colors.border = cssVar('border-color', colors.border);
+                    colors.links = cssVar('link-color', colors.links);
+                    const cssVarExists = (name) => new RegExp(`--${name}\\s*:`).test(skinCss);
+                    const typography = this.schema.customizer.typography;
+                    typography.fontFamily = cssVar('font-family', typography.fontFamily);
+                    typography.headingSize = cssVar('heading-size', typography.headingSize);
+                    typography.bodySize = cssVar('body-size', typography.bodySize);
+                    typography.mainWidth = cssVar('main-width', typography.mainWidth);
+                    typography.postWidth = cssVar('post-width', typography.postWidth);
+                    typography.sidebarLeftWidth = cssVar('sidebar-left-width', typography.sidebarLeftWidth);
+                    typography.sidebarRightWidth = cssVar('sidebar-right-width', typography.sidebarRightWidth);
+                    if (cssVarExists('sidebar-width') && !cssVarExists('sidebar-right-width')) {
+                        typography.sidebarRightWidth = cssVar('sidebar-width', typography.sidebarRightWidth);
+                    }
+                }
+
+                this.schema.sections = sections;
+                this.selectedId = null;
+                this.selectedSectionId = null;
+                this.saveState();
+                this.renderAll();
+                this.closeModal();
+                this.showToast(`Imported ${sections.length} sections and ${widgetCount} widgets.`, 'success');
+            }
+
+            promptAddSection() {
+                const typeOptions = Object.entries(SECTION_TYPE_LABELS).map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+                this.showModal('Add Blogger Section', `
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Section Name</label>
+                            <input type="text" id="new-sec-name" value="Custom Section" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Section ID</label>
+                            <input type="text" id="new-sec-id" value="custom-sec-1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200 code-font">
+                            <p class="text-[10px] text-slate-500 mt-1">Letters, numbers, hyphens and underscores only.</p>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Section Type</label>
+                            <select id="new-sec-type" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">${typeOptions}</select>
+                        </div>
+                        <button onclick="app.executeAddSection()" class="w-full bg-blogger-orange hover:bg-blogger-darkorange text-white py-2 rounded font-semibold transition">Create Section</button>
+                    </div>
+                `, 'normal');
+            }
+
+            executeAddSection() {
+                const nameInput = document.getElementById('new-sec-name');
+                const idInput = document.getElementById('new-sec-id');
+                const typeInput = document.getElementById('new-sec-type');
+                const name = (nameInput ? nameInput.value : '').trim() || 'Custom Section';
+                const sectionId = (idInput ? idInput.value : '').trim();
+                const type = typeInput ? typeInput.value : 'main';
+
+                if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(sectionId)) {
+                    this.showToast('Section ID must start with a letter and contain only letters, numbers, - or _.', 'error');
+                    return;
+                }
+                if (this.schema.sections.some((sec) => sec.id === sectionId)) {
+                    this.showToast('That section ID already exists. Choose a unique ID.', 'error');
+                    return;
+                }
+                if (!SECTION_TYPE_LABELS[type]) {
+                    this.showToast('Unknown section type.', 'error');
+                    return;
+                }
+
+                this.schema.sections.push({ id: sectionId, name, type, widgets: [] });
+                this.selectedSectionId = sectionId;
+                this.saveState();
+                this.renderAll();
+                this.closeModal();
+                this.showToast(`${name} added.`, 'success');
+            }
+
+            promptAddWidgetToSection(sectionId) {
+                const section = this.schema.sections.find((sec) => sec.id === sectionId);
+                if (!section) return;
+                const options = Object.entries(NATIVE_WIDGET_REGISTRY)
+                    .map(([type, info]) => `<option value="${type}">${escapeHtml(info.defaultTitle)} (${type})</option>`)
+                    .join('');
+                this.showModal('Add Gadget to Section', `
+                    <div class="space-y-3 text-xs">
+                        <p class="text-slate-400">Target section: <span class="text-slate-200 font-semibold">${escapeHtml(section.name)}</span> <span class="font-mono text-slate-500">#${escapeHtml(section.id)}</span></p>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Native Blogger Gadget</label>
+                            <select id="modal-widget-type" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">${options}</select>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Custom Title (optional)</label>
+                            <input type="text" id="modal-widget-title" placeholder="Defaults to the gadget name" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
+                        </div>
+                        <button onclick="app.executeAddWidgetToSection('${section.id}')" class="w-full bg-blogger-orange hover:bg-blogger-darkorange text-white py-2 rounded font-semibold transition">Add Gadget</button>
+                    </div>
+                `, 'normal');
+            }
+
+            executeAddWidgetToSection(sectionId) {
+                const section = this.schema.sections.find((sec) => sec.id === sectionId);
+                const typeInput = document.getElementById('modal-widget-type');
+                const titleInput = document.getElementById('modal-widget-title');
+                const type = typeInput ? typeInput.value : '';
+                if (!section || !NATIVE_WIDGET_REGISTRY[type]) {
+                    this.showToast('Unable to add this gadget.', 'error');
+                    return;
+                }
+                const customTitle = titleInput ? titleInput.value.trim() : '';
+                const widget = this.createWidget(type, customTitle);
+                section.widgets.push(widget);
+                this.selectedId = widget.id;
+                this.selectedSectionId = section.id;
+                this.saveState();
+                this.renderAll();
+                this.closeModal();
+                this.showToast(`${NATIVE_WIDGET_REGISTRY[type].defaultTitle} added to ${section.name}.`, 'success');
+            }
+
+            renameProject() {
+                this.showModal('Rename Project', `
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Project Name</label>
+                            <input type="text" id="project-rename-input" value="${escapeHtml(this.schema.metadata.name)}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
+                        </div>
+                        <button onclick="app.executeRenameProject()" class="w-full bg-blogger-orange hover:bg-blogger-darkorange text-white py-2 rounded font-semibold transition">Save Name</button>
+                    </div>
+                `, 'normal');
+            }
+
+            executeRenameProject() {
+                const input = document.getElementById('project-rename-input');
+                const name = input ? input.value.trim() : '';
+                if (!name) {
+                    this.showToast('Project name cannot be empty.', 'error');
+                    return;
+                }
+                this.schema.metadata.name = name;
+                const display = document.getElementById('project-name-display');
+                if (display) display.textContent = name;
+                this.saveState();
+                this.closeModal();
+                this.showToast('Project name updated.', 'success');
+            }
+
+            promptConfirm(title, messageHtml, action) {
+                this.pendingAction = action;
+                this.showModal(title, `
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">${messageHtml}</p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="app.closeModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded text-xs font-semibold transition">Cancel</button>
+                        <button onclick="app.runPendingAction()" class="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded text-xs font-semibold transition">Delete</button>
+                    </div>
+                `, 'error');
+            }
+
+            runPendingAction() {
+                const action = this.pendingAction;
+                this.pendingAction = null;
+                this.closeModal();
+                if (typeof action === 'function') action();
+            }
+
+            showModal(title, content, type = 'normal') {
+                const modal = document.getElementById('modal-container');
+                if (!modal) return;
+                const icon = type === 'error'
+                    ? 'fa-triangle-exclamation text-red-400'
+                    : type === 'success'
+                        ? 'fa-circle-check text-emerald-400'
+                        : 'fa-circle-info text-blogger-orange';
+                modal.innerHTML = `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar p-6 shadow-2xl" role="dialog" aria-modal="true">
+                        <div class="flex items-center justify-between gap-3 mb-4 pb-2 border-b border-slate-700">
+                            <h3 class="font-bold text-sm text-slate-100 flex items-center"><i class="fa-solid ${icon} mr-2"></i>${escapeHtml(title)}</h3>
+                            <button onclick="app.closeModal()" class="text-slate-400 hover:text-white" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div>${content}</div>
+                    </div>
+                `;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                const firstField = modal.querySelector('input, textarea, select');
+                if (firstField) setTimeout(() => firstField.focus(), 40);
+            }
+
+            closeModal() {
+                const modal = document.getElementById('modal-container');
+                this.pendingAction = null;
+                if (!modal) return;
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+
+            showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                const background = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-slate-700';
+                const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-info-circle';
+                const toast = document.createElement('div');
+                toast.className = `${background} text-white px-4 py-3 rounded-lg shadow-xl text-xs flex items-center space-x-2 transition transform translate-y-2 opacity-0 pointer-events-auto`;
+                toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${escapeHtml(message)}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+                setTimeout(() => {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3500);
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        this.closeModal();
+                        return;
+                    }
+                    const target = event.target;
+                    const tagName = target && target.tagName ? target.tagName.toLowerCase() : '';
+                    const isTyping = tagName === 'input' || tagName === 'textarea' || tagName === 'select' || (target && target.isContentEditable);
+                    if (!(event.ctrlKey || event.metaKey) || isTyping) return;
+                    const key = event.key.toLowerCase();
+                    if (key === 'z') {
+                        event.preventDefault();
+                        if (event.shiftKey) this.redo();
+                        else this.undo();
+                    } else if (key === 'y') {
+                        event.preventDefault();
+                        this.redo();
+                    }
+                });
+
+                const modal = document.getElementById('modal-container');
+                if (modal) {
+                    modal.addEventListener('click', (event) => {
+                        if (event.target === modal) this.closeModal();
+                    });
+                }
+
+                const canvasRoot = document.getElementById('canvas-root');
+                if (canvasRoot) {
+                    canvasRoot.addEventListener('click', (event) => {
+                        const link = event.target.closest('a');
+                        if (link) event.preventDefault();
+                    });
+                }
+            }
+        }
+
+        const app = new BloggerThemeBuilderPro();
+        window.app = app;
+    </script>
+</body>
+</html>
