@@ -1,0 +1,11 @@
+# Whitelist: only files explicitly listed below are published.
+# Everything else in this folder (internal notes, E2E docs, task boards,
+# QA/review reports, planning, artifacts, project metadata, local logs)
+# stays private and is never pushed.
+*
+!.gitignore
+!.gitattributes
+!LICENSE
+!NOTICE
+!README.md
+!index.html
